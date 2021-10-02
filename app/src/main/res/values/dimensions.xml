@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="main_prayer_name">20sp</dimen>
+    <dimen name="main_prayer_time">30sp</dimen>
+    <dimen name="margin1">7dp</dimen>
+</resources>
