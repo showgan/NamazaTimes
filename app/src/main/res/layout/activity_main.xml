@@ -170,6 +170,7 @@
             android:layout_marginBottom="@dimen/margin1"
             android:background="@drawable/prayer_time_frame">
             <TextView
+                android:id="@+id/textViewMainSabahAdiga"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -179,6 +180,7 @@
                 android:text="Sebeh"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainSabahHebrew"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -188,6 +190,7 @@
                 android:text="בוקר"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainSabahArabic"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -197,7 +200,7 @@
                 android:text="فجر"
                 android:layout_weight="1.0" />
             <TextView
-                android:id="@+id/textViewMainTimeFajr"
+                android:id="@+id/textViewMainSabahTime"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
@@ -224,34 +227,37 @@
             android:layout_marginBottom="@dimen/margin1"
             android:background="@drawable/prayer_time_frame">
             <TextView
+                android:id="@+id/textViewMainShurooqAdiga"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="@font/corbel"
-                android:textColor="@color/mainText"
+                android:textColor="@color/mainTextSelected"
                 android:text="Tığe Kıćeqığö"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainShurooqHebrew"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="@font/carmela"
-                android:textColor="@color/mainText"
+                android:textColor="@color/mainTextSelected"
                 android:text="זריחה"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainShurooqArabic"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="sans-serif-thin"
-                android:textColor="@color/mainText"
+                android:textColor="@color/mainTextSelected"
                 android:text="شروق"
                 android:layout_weight="1.0" />
             <TextView
-                android:id="@+id/textViewMainTimesShurooq"
+                android:id="@+id/textViewMainShurooqTime"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
@@ -262,7 +268,7 @@
                 android:shadowDy="5"
                 android:shadowRadius="9"
                 android:fontFamily="@font/gisha"
-                android:textColor="@color/mainText"
+                android:textColor="@color/mainTextSelected"
                 android:text="6:24"
                 android:layout_weight="1.0" />
         </LinearLayout>
@@ -278,34 +284,37 @@
             android:layout_marginBottom="@dimen/margin1"
             android:background="@drawable/prayer_time_frame">
             <TextView
+                android:id="@+id/textViewMainDuhrAdiga"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="@font/corbel"
-                android:textColor="@color/mainTextSelected"
+                android:textColor="@color/mainText"
                 android:text="Şegağö"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainDuhrHebrew"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="@font/carmela"
-                android:textColor="@color/mainTextSelected"
+                android:textColor="@color/mainText"
                 android:text="צהריים"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainDuhrArabic"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="sans-serif-thin"
-                android:textColor="@color/mainTextSelected"
+                android:textColor="@color/mainText"
                 android:text="ظهر"
                 android:layout_weight="1.0" />
             <TextView
-                android:id="@+id/textViewMainTimeDuhr"
+                android:id="@+id/textViewMainDuhrTime"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
@@ -316,7 +325,7 @@
                 android:shadowDy="5"
                 android:shadowRadius="9"
                 android:fontFamily="@font/gisha"
-                android:textColor="@color/mainTextSelected"
+                android:textColor="@color/mainText"
                 android:text="12:35"
                 android:layout_weight="1.0" />
         </LinearLayout>
@@ -332,6 +341,7 @@
             android:layout_marginBottom="@dimen/margin1"
             android:background="@drawable/prayer_time_frame">
             <TextView
+                android:id="@+id/textViewMainAsrAdiga"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -341,6 +351,7 @@
                 android:text="Yeked"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainAsrHebrew"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -350,6 +361,7 @@
                 android:text="אחר צהריים"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainAsrArabic"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -359,7 +371,7 @@
                 android:text="عصر"
                 android:layout_weight="1.0" />
             <TextView
-                android:id="@+id/textViewMainTimeAsr"
+                android:id="@+id/textViewMainAsrTime"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
@@ -383,10 +395,10 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:layoutDirection="ltr"
-            android:enabled="true"
             android:layout_marginBottom="@dimen/margin1"
             android:background="@drawable/prayer_time_frame">
             <TextView
+                android:id="@+id/textViewMainMagribAdiga"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -396,6 +408,7 @@
                 android:text="Aḣçam"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainMagribHebrew"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -405,6 +418,7 @@
                 android:text="ערב"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainMagribArabic"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -414,7 +428,7 @@
                 android:text="مغرب"
                 android:layout_weight="1.0" />
             <TextView
-                android:id="@+id/textViewMainTimeMagrib"
+                android:id="@+id/textViewMainMagribTime"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
@@ -440,6 +454,7 @@
             android:layoutDirection="ltr"
             android:background="@drawable/prayer_time_frame">
             <TextView
+                android:id="@+id/textViewMainIshaAdiga"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -449,6 +464,7 @@
                 android:text="Yaś"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainIshaHebrew"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -458,6 +474,7 @@
                 android:text="לילה"
                 android:layout_weight="1.0" />
             <TextView
+                android:id="@+id/textViewMainIshaArabic"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
@@ -467,7 +484,7 @@
                 android:text="عشاء"
                 android:layout_weight="1.0" />
             <TextView
-                android:id="@+id/textViewMainTimeIsha"
+                android:id="@+id/textViewMainIshaTime"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"

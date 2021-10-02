@@ -1,12 +1,15 @@
 package com.mastegoane.namazatimes;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import android.app.DatePickerDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.TextView;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.mastegoane.namazatimes.databinding.ActivityMainBinding;
 import java.text.SimpleDateFormat;
@@ -89,14 +92,15 @@ public class MainActivity extends AppCompatActivity {
     private void updateViews() {
         final PrayerTimes.DailyTimes dailyTimes = mMainViewModel.getTodaysTimes();
         if (dailyTimes != null) {
-            mBinding.textViewMainTimeFajr.setText(dailyTimes.mFajr);
-            mBinding.textViewMainTimesShurooq.setText(dailyTimes.mShurooq);
-            mBinding.textViewMainTimeDuhr.setText(dailyTimes.mDuhr);
-            mBinding.textViewMainTimeAsr.setText(dailyTimes.mAsr);
-            mBinding.textViewMainTimeMagrib.setText(dailyTimes.mMagrib);
-            mBinding.textViewMainTimeIsha.setText(dailyTimes.mIsha);
+            mBinding.textViewMainSabahTime.setText(dailyTimes.mFajr);
+            mBinding.textViewMainShurooqTime.setText(dailyTimes.mShurooq);
+            mBinding.textViewMainDuhrTime.setText(dailyTimes.mDuhr);
+            mBinding.textViewMainAsrTime.setText(dailyTimes.mAsr);
+            mBinding.textViewMainMagribTime.setText(dailyTimes.mMagrib);
+            mBinding.textViewMainIshaTime.setText(dailyTimes.mIsha);
 
-            switch (mMainViewModel.getCurrentPrayerIndex()) {
+            final int prayerIndex = mMainViewModel.getCurrentPrayerIndex();
+            switch (prayerIndex) {
                 case 1:
                     mBinding.linearLayoutMainTimeFajr.setEnabled(true);
                     mBinding.linearLayoutMainTimeShurooq.setEnabled(false);
@@ -154,41 +158,34 @@ public class MainActivity extends AppCompatActivity {
                     mBinding.linearLayoutMainTimeIsha.setEnabled(false);
                     break;
             }
+            updateTextColors(prayerIndex);
 
             /*
             <TextView
-                android:fontFamily="@font/corbel"
                 android:textColor="@color/mainText"
             <TextView
-                android:fontFamily="@font/carmela"
                 android:textColor="@color/mainText"
             <TextView
-                android:fontFamily="sans-serif-thin"
                 android:textColor="@color/mainText"
             <TextView
                 android:shadowColor="#50000000"
                 android:shadowDx="5"
                 android:shadowDy="5"
                 android:shadowRadius="9"
-                android:fontFamily="@font/gisha"
                 android:textColor="@color/mainText"
 
         <!-- Duhr -->
             <TextView
-                android:fontFamily="@font/corbel"
                 android:textColor="@color/mainTextSelected"
             <TextView
-                android:fontFamily="@font/carmela"
                 android:textColor="@color/mainTextSelected"
             <TextView
-                android:fontFamily="sans-serif-thin"
                 android:textColor="@color/mainTextSelected"
             <TextView
                 android:shadowColor="#50000000"
                 android:shadowDx="5"
                 android:shadowDy="5"
                 android:shadowRadius="9"
-                android:fontFamily="@font/gisha"
                 android:textColor="@color/mainTextSelected"
              */
         }
@@ -197,6 +194,81 @@ public class MainActivity extends AppCompatActivity {
         mBinding.textViewMainDate.setText(simpleDateFormat.format(mCalendar.getTime()));
         final int dayOfWeek = mCalendar.get(Calendar.DAY_OF_WEEK) - 1;
         mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n" + mDayNamesHebrew[dayOfWeek] + "\n" + mDayNamesArabic[dayOfWeek]);
+    }
+
+    private void updateTextColors(int prayerIndex) {
+        final int colorNotSelected = ContextCompat.getColor(this, R.color.mainText);
+        final int colorSelected = ContextCompat.getColor(this, R.color.mainTextSelected);
+        mBinding.textViewMainSabahAdiga.setTextColor(colorNotSelected);
+        mBinding.textViewMainSabahHebrew.setTextColor(colorNotSelected);
+        mBinding.textViewMainSabahArabic.setTextColor(colorNotSelected);
+        mBinding.textViewMainSabahTime.setTextColor(colorNotSelected);
+
+        mBinding.textViewMainShurooqAdiga.setTextColor(colorNotSelected);
+        mBinding.textViewMainShurooqHebrew.setTextColor(colorNotSelected);
+        mBinding.textViewMainShurooqArabic.setTextColor(colorNotSelected);
+        mBinding.textViewMainShurooqTime.setTextColor(colorNotSelected);
+
+        mBinding.textViewMainDuhrAdiga.setTextColor(colorNotSelected);
+        mBinding.textViewMainDuhrHebrew.setTextColor(colorNotSelected);
+        mBinding.textViewMainDuhrArabic.setTextColor(colorNotSelected);
+        mBinding.textViewMainDuhrTime.setTextColor(colorNotSelected);
+
+        mBinding.textViewMainAsrAdiga.setTextColor(colorNotSelected);
+        mBinding.textViewMainAsrHebrew.setTextColor(colorNotSelected);
+        mBinding.textViewMainAsrArabic.setTextColor(colorNotSelected);
+        mBinding.textViewMainAsrTime.setTextColor(colorNotSelected);
+
+        mBinding.textViewMainMagribAdiga.setTextColor(colorNotSelected);
+        mBinding.textViewMainMagribHebrew.setTextColor(colorNotSelected);
+        mBinding.textViewMainMagribArabic.setTextColor(colorNotSelected);
+        mBinding.textViewMainMagribTime.setTextColor(colorNotSelected);
+
+        mBinding.textViewMainIshaAdiga.setTextColor(colorNotSelected);
+        mBinding.textViewMainIshaHebrew.setTextColor(colorNotSelected);
+        mBinding.textViewMainIshaArabic.setTextColor(colorNotSelected);
+        mBinding.textViewMainIshaTime.setTextColor(colorNotSelected);
+
+        switch (prayerIndex) {
+            case 1:
+                mBinding.textViewMainSabahAdiga.setTextColor(colorSelected);
+                mBinding.textViewMainSabahHebrew.setTextColor(colorSelected);
+                mBinding.textViewMainSabahArabic.setTextColor(colorSelected);
+                mBinding.textViewMainSabahTime.setTextColor(colorSelected);
+                break;
+            case 2:
+                mBinding.textViewMainShurooqAdiga.setTextColor(colorSelected);
+                mBinding.textViewMainShurooqHebrew.setTextColor(colorSelected);
+                mBinding.textViewMainShurooqArabic.setTextColor(colorSelected);
+                mBinding.textViewMainShurooqTime.setTextColor(colorSelected);
+                break;
+            case 3:
+                mBinding.textViewMainDuhrAdiga.setTextColor(colorSelected);
+                mBinding.textViewMainDuhrHebrew.setTextColor(colorSelected);
+                mBinding.textViewMainDuhrArabic.setTextColor(colorSelected);
+                mBinding.textViewMainDuhrTime.setTextColor(colorSelected);
+                break;
+            case 4:
+                mBinding.textViewMainAsrAdiga.setTextColor(colorSelected);
+                mBinding.textViewMainAsrHebrew.setTextColor(colorSelected);
+                mBinding.textViewMainAsrArabic.setTextColor(colorSelected);
+                mBinding.textViewMainAsrTime.setTextColor(colorSelected);
+                break;
+            case 5:
+                mBinding.textViewMainMagribAdiga.setTextColor(colorSelected);
+                mBinding.textViewMainMagribHebrew.setTextColor(colorSelected);
+                mBinding.textViewMainMagribArabic.setTextColor(colorSelected);
+                mBinding.textViewMainMagribTime.setTextColor(colorSelected);
+                break;
+            case 6:
+                mBinding.textViewMainIshaAdiga.setTextColor(colorSelected);
+                mBinding.textViewMainIshaHebrew.setTextColor(colorSelected);
+                mBinding.textViewMainIshaArabic.setTextColor(colorSelected);
+                mBinding.textViewMainIshaTime.setTextColor(colorSelected);
+                break;
+            default:
+                break;
+        }
     }
 
     private Calendar mCalendar;
