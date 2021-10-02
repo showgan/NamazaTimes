@@ -3,30 +3,30 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/navToYearlyPrayerTimesActivity"
-        android:title="Prayer Times"
+        android:id="@+id/navShareToWhatsapp"
+        android:title="Share to Whatsapp"
         app:showAsAction="ifRoom"
         android:orderInCategory="1"
-        android:icon="@drawable/prayer_times_icon"/>
+        android:icon="@drawable/ic_baseline_share_24"/>
 
     <item
-        android:id="@+id/navToDailyPrayersActivity"
-        android:title="How to Pray"
+        android:id="@+id/navSaveToGallery"
+        android:title="Save to Gallery"
         app:showAsAction="ifRoom"
         android:orderInCategory="2"
-        android:icon="@drawable/prayer_how_to_icon"/>
+        android:icon="@drawable/ic_baseline_add_to_photos_24"/>
 
-    <item
-        android:id="@+id/navToAmdazActivity"
-        android:title="Amdaz"
-        app:showAsAction="ifRoom"
-        android:orderInCategory="3"
-        android:icon="@drawable/amdaz_icon"/>
+<!--    <item-->
+<!--        android:id="@+id/navAmdazActivity"-->
+<!--        android:title="Amdaz"-->
+<!--        app:showAsAction="ifRoom"-->
+<!--        android:orderInCategory="3"-->
+<!--        android:icon="@drawable/amdaz_icon"/>-->
 
-    <item
-        android:id="@+id/navToMainActivity"
-        android:title="Home"
-        app:showAsAction="always"
-        android:orderInCategory="4"
-        android:icon="@drawable/homepage_icon"/>
+<!--    <item-->
+<!--        android:id="@+id/navMainActivity"-->
+<!--        android:title="Home"-->
+<!--        app:showAsAction="always"-->
+<!--        android:orderInCategory="4"-->
+<!--        android:icon="@drawable/homepage_icon"/>-->
 </menu>

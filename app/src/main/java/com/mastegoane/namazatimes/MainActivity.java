@@ -1,19 +1,30 @@
 package com.mastegoane.namazatimes;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
-import android.widget.TextView;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import android.widget.Toast;
 import com.mastegoane.namazatimes.databinding.ActivityMainBinding;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -35,6 +46,14 @@ public class MainActivity extends AppCompatActivity {
         updateViews();
     }
 
+//    public void buttonShareWhatsappClicked(View view) {
+//        shareScreenshot(false);
+//    }
+
+//    public void buttonShareGalleryClicked(View view) {
+//        shareScreenshot(true);
+//    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,28 +67,29 @@ public class MainActivity extends AppCompatActivity {
 
         mCalendar = mMainViewModel.getCalendar();
 
-        final BottomNavigationView navigationView = findViewById(R.id.bottomnavigationView);
-        navigationView.setSelectedItemId(R.id.navToMainActivity);
-        navigationView.setOnNavigationItemSelectedListener(item -> {
+//        mBinding.bottomnavigationView.setSelectedItemId(R.id.navToMainActivity);
+        mBinding.bottomnavigationView.setOnNavigationItemSelectedListener(item -> {
 //            Intent intent;
             switch (item.getItemId()) {
-                case R.id.navToDailyPrayersActivity:
+                case R.id.navShareToWhatsapp:
+                    shareScreenshot(false);
 //                        intent = new Intent(getApplicationContext(), DailyPrayersActivity.class);
 //                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 //                        startActivity(intent);
                     return true;
-                case R.id.navToYearlyPrayerTimesActivity:
+                case R.id.navSaveToGallery:
+                    shareScreenshot(true);
 //                        intent = new Intent(getApplicationContext(), YearlyPrayerTimesActivity.class);
 //                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 //                        startActivity(intent);
                     return true;
-                case R.id.navToAmdazActivity:
+//                case R.id.navToAmdazActivity:
 //                        intent = new Intent(getApplicationContext(), DailyPrayersActivity.class);
 //                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 //                        startActivity(intent);
-                    return true;
-                case R.id.navToMainActivity:
-                    return true;
+//                    return true;
+//                case R.id.navToMainActivity:
+//                    return true;
             }
             return false;
         });
@@ -268,6 +288,56 @@ public class MainActivity extends AppCompatActivity {
                 break;
             default:
                 break;
+        }
+    }
+
+    private void shareScreenshot(boolean shareToGallery) {
+//        LinearLayout view = this.findViewById(R.id.linearLayoutPublishFrame);
+        final ConstraintLayout view = mBinding.constraintLayoutMainFullScreen;
+        int width = view.getWidth();
+        int height = view.getHeight();
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        File outputDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (!outputDir.exists()) {
+            if (!outputDir.mkdirs()) {
+                Log.e("DIRECTORY_PICTURES", "Failed to create output directory");
+                return;
+            }
+        }
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+        final String outputFilePath = outputDir.getAbsolutePath() + File.separator + "question2share.webp";
+        Log.d("Writing file", outputFilePath);
+        String mediaPath = "";
+        try {
+            File outputFile = new File(outputFilePath);
+            OutputStream outputStream = new FileOutputStream(outputFile);
+            bitmap.compress(Bitmap.CompressFormat.WEBP, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        try {
+            mediaPath = MediaStore.Images.Media.insertImage(this.getContentResolver(), outputFilePath, null, null);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (shareToGallery) {
+            final String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "AdigaQuiz_" + timeStamp, "");
+            Toast.makeText(this, "SAVED THE IMAGE TO THE GALLERY", Toast.LENGTH_SHORT).show();
+        } else {
+            Intent intentShare = new Intent(Intent.ACTION_SEND);
+//            intentShare.setType("image/webp");
+            intentShare.setType("image/*");
+            intentShare.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//            intentShare.putExtra(Intent.EXTRA_STREAM, Uri.parse(outputFilePath));
+            intentShare.putExtra(Intent.EXTRA_STREAM, Uri.parse(mediaPath));
+            intentShare.setPackage("com.whatsapp");
+            startActivity(Intent.createChooser(intentShare, "Share Image"));
         }
     }
 
