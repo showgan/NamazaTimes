@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DailyTimesFragmentC">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_marginHorizontal="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/textViewMainAqsa"
+        android:textDirection="ltr"
+        android:layoutDirection="ltr">
+
+        <!-- Fajr -->
+        <LinearLayout
+            android:id="@+id/linearLayoutMainTimeFajr"
+            android:layout_weight="1.0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layoutDirection="ltr"
+            android:layout_marginBottom="@dimen/margin1"
+            android:background="@drawable/prayer_time_frame">
+            <TextView
+                android:id="@+id/textViewMainSabahAdiga"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_name"
+                android:fontFamily="@font/corbel"
+                android:textColor="@color/mainText"
+                android:text="Sebeh"
+                android:layout_weight="1.0" />
+            <TextView
+                android:id="@+id/textViewMainSabahTime"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_time"
+                android:shadowColor="#50000000"
+                android:shadowDx="5"
+                android:shadowDy="5"
+                android:shadowRadius="9"
+                android:fontFamily="@font/gisha"
+                android:textColor="@color/mainText"
+                android:text="5:07"
+                android:layout_weight="1.0" />
+        </LinearLayout>
+
+        <!-- Shurooq -->
+        <LinearLayout
+            android:id="@+id/linearLayoutMainTimeShurooq"
+            android:layout_weight="1.0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layoutDirection="ltr"
+            android:layout_marginBottom="@dimen/margin1"
+            android:background="@drawable/prayer_time_frame">
+            <TextView
+                android:id="@+id/textViewMainShurooqAdiga"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_name"
+                android:fontFamily="@font/corbel"
+                android:textColor="@color/mainTextSelected"
+                android:text="Tığe Kıćeqığö"
+                android:layout_weight="1.0" />
+            <TextView
+                android:id="@+id/textViewMainShurooqTime"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_time"
+                android:shadowColor="#50000000"
+                android:shadowDx="5"
+                android:shadowDy="5"
+                android:shadowRadius="9"
+                android:fontFamily="@font/gisha"
+                android:textColor="@color/mainTextSelected"
+                android:text="6:24"
+                android:layout_weight="1.0" />
+        </LinearLayout>
+
+        <!-- Duhr -->
+        <LinearLayout
+            android:id="@+id/linearLayoutMainTimeDuhr"
+            android:layout_weight="1.0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layoutDirection="ltr"
+            android:layout_marginBottom="@dimen/margin1"
+            android:background="@drawable/prayer_time_frame">
+            <TextView
+                android:id="@+id/textViewMainDuhrAdiga"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_name"
+                android:fontFamily="@font/corbel"
+                android:textColor="@color/mainText"
+                android:text="Şegağö"
+                android:layout_weight="1.0" />
+            <TextView
+                android:id="@+id/textViewMainDuhrTime"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_time"
+                android:shadowColor="#50000000"
+                android:shadowDx="5"
+                android:shadowDy="5"
+                android:shadowRadius="9"
+                android:fontFamily="@font/gisha"
+                android:textColor="@color/mainText"
+                android:text="12:35"
+                android:layout_weight="1.0" />
+        </LinearLayout>
+
+        <!-- Asr -->
+        <LinearLayout
+            android:id="@+id/linearLayoutMainTimeAsr"
+            android:layout_weight="1.0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layoutDirection="ltr"
+            android:layout_marginBottom="@dimen/margin1"
+            android:background="@drawable/prayer_time_frame">
+            <TextView
+                android:id="@+id/textViewMainAsrAdiga"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_name"
+                android:fontFamily="@font/corbel"
+                android:textColor="@color/mainText"
+                android:text="Yeked"
+                android:layout_weight="1.0" />
+            <TextView
+                android:id="@+id/textViewMainAsrTime"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_time"
+                android:shadowColor="#50000000"
+                android:shadowDx="5"
+                android:shadowDy="5"
+                android:shadowRadius="9"
+                android:fontFamily="@font/gisha"
+                android:textColor="@color/mainText"
+                android:text="3:58"
+                android:layout_weight="1.0" />
+        </LinearLayout>
+
+        <!-- Magrib -->
+        <LinearLayout
+            android:id="@+id/linearLayoutMainTimeMagrib"
+            android:layout_weight="1.0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layoutDirection="ltr"
+            android:layout_marginBottom="@dimen/margin1"
+            android:background="@drawable/prayer_time_frame">
+            <TextView
+                android:id="@+id/textViewMainMagribAdiga"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_name"
+                android:fontFamily="@font/corbel"
+                android:textColor="@color/mainText"
+                android:text="Aḣçam"
+                android:layout_weight="1.0" />
+            <TextView
+                android:id="@+id/textViewMainMagribTime"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_time"
+                android:shadowColor="#50000000"
+                android:shadowDx="5"
+                android:shadowDy="5"
+                android:shadowRadius="9"
+                android:fontFamily="@font/gisha"
+                android:textColor="@color/mainText"
+                android:text="6:45"
+                android:layout_weight="1.0" />
+        </LinearLayout>
+
+        <!-- Isha -->
+        <LinearLayout
+            android:id="@+id/linearLayoutMainTimeIsha"
+            android:layout_weight="1.0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layoutDirection="ltr"
+            android:background="@drawable/prayer_time_frame">
+            <TextView
+                android:id="@+id/textViewMainIshaAdiga"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_name"
+                android:fontFamily="@font/corbel"
+                android:textColor="@color/mainText"
+                android:text="Yaś"
+                android:layout_weight="1.0" />
+            <TextView
+                android:id="@+id/textViewMainIshaTime"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_horizontal|center_vertical"
+                android:textSize="@dimen/main_prayer_time"
+                android:shadowColor="#50000000"
+                android:shadowDx="5"
+                android:shadowDy="5"
+                android:shadowRadius="9"
+                android:fontFamily="@font/gisha"
+                android:textColor="@color/mainText"
+                android:text="7:57"
+                android:layout_weight="1.0" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textViewMainAqsa"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal|center_vertical"
+        android:layoutDirection="ltr"
+        android:paddingVertical="8dp"
+        android:background="#F5F5F5"
+        android:textSize="12sp"
+        android:text="Akše Camıye Waḣtex"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

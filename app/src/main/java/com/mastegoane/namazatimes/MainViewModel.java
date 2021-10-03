@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.res.Resources;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,6 +16,7 @@ public class MainViewModel extends AndroidViewModel {
         mApplication = application;
         mResources = mApplication.getApplicationContext().getResources();
         mPrayerTimes = new PrayerTimes();
+        mUpdateViews = new MutableLiveData<>(false);
     }
 
     public void readPrayerTimes() {
@@ -33,13 +36,23 @@ public class MainViewModel extends AndroidViewModel {
         return mPrayerTimes.getTimesOf(date);
     }
 
-    public Calendar getCalendar() {
+    public LiveData<Calendar> getCalendar() {
         return mPrayerTimes.getCalendar();
     }
 
     public int getCurrentPrayerIndex() {
         return mPrayerTimes.getCurrentPrayerIndex();
     }
+
+    public void updateViews() {
+        mUpdateViews.setValue(!mUpdateViews.getValue());
+    }
+
+    public LiveData<Boolean> getUpdateViews() {
+        return mUpdateViews;
+    }
+
+    private MutableLiveData<Boolean> mUpdateViews;
 
     private final Application mApplication;
     private final Resources mResources;

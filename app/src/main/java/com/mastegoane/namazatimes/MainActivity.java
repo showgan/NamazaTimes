@@ -1,8 +1,10 @@
 package com.mastegoane.namazatimes;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -13,11 +15,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.Toast;
 import com.mastegoane.namazatimes.databinding.ActivityMainBinding;
+import com.orhanobut.dialogplus.DialogPlus;
+import com.orhanobut.dialogplus.DialogPlusBuilder;
+import com.orhanobut.dialogplus.Holder;
+import com.orhanobut.dialogplus.ViewHolder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -43,16 +52,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             mCalendar.add(Calendar.DATE, -1);
         }
+        mMainViewModel.updateViews();
         updateViews();
     }
-
-//    public void buttonShareWhatsappClicked(View view) {
-//        shareScreenshot(false);
-//    }
-
-//    public void buttonShareGalleryClicked(View view) {
-//        shareScreenshot(true);
-//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,33 +65,34 @@ public class MainActivity extends AppCompatActivity {
                 .get(MainViewModel.class);
         mBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
+
+        final DisplayMetrics displayMetrics = getApplicationContext().getResources().getDisplayMetrics();
+        mDp2pxFactor = displayMetrics.density;
         mSharedPreferences = this.getSharedPreferences("namazatimes", MODE_PRIVATE);
+        mCalendar = mMainViewModel.getCalendar().getValue();
 
-        mCalendar = mMainViewModel.getCalendar();
+        mFragmentManager = getSupportFragmentManager();
+        mDailyTimesFragmentA = new DailyTimesFragmentA();
+        mDailyTimesFragmentB = new DailyTimesFragmentB();
+        mDailyTimesFragmentC = new DailyTimesFragmentC();
+        mCurrentFragment = mSharedPreferences.getInt("sp_current_fragment", 1);
+        if (mCurrentFragment < 1 || mCurrentFragment > 3) {
+            // BUG
+            mCurrentFragment = 1;
+        }
+        selectFragment(mCurrentFragment);
 
-//        mBinding.bottomnavigationView.setSelectedItemId(R.id.navToMainActivity);
         mBinding.bottomnavigationView.setOnNavigationItemSelectedListener(item -> {
-//            Intent intent;
             switch (item.getItemId()) {
                 case R.id.navShareToWhatsapp:
                     shareScreenshot(false);
-//                        intent = new Intent(getApplicationContext(), DailyPrayersActivity.class);
-//                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                        startActivity(intent);
                     return true;
                 case R.id.navSaveToGallery:
                     shareScreenshot(true);
-//                        intent = new Intent(getApplicationContext(), YearlyPrayerTimesActivity.class);
-//                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                        startActivity(intent);
                     return true;
-//                case R.id.navToAmdazActivity:
-//                        intent = new Intent(getApplicationContext(), DailyPrayersActivity.class);
-//                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                        startActivity(intent);
-//                    return true;
-//                case R.id.navToMainActivity:
-//                    return true;
+                case R.id.navSettings:
+                    showDialogPlusSettings();
+                    return true;
             }
             return false;
         });
@@ -101,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
                 mCalendar.set(Calendar.YEAR, year);
                 mCalendar.set(Calendar.MONTH, monthOfYear);
                 mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                mMainViewModel.updateViews();
                 updateViews();
             }
         };
@@ -109,190 +113,115 @@ public class MainActivity extends AppCompatActivity {
         updateViews();
     }
 
-    private void updateViews() {
-        final PrayerTimes.DailyTimes dailyTimes = mMainViewModel.getTodaysTimes();
-        if (dailyTimes != null) {
-            mBinding.textViewMainSabahTime.setText(dailyTimes.mFajr);
-            mBinding.textViewMainShurooqTime.setText(dailyTimes.mShurooq);
-            mBinding.textViewMainDuhrTime.setText(dailyTimes.mDuhr);
-            mBinding.textViewMainAsrTime.setText(dailyTimes.mAsr);
-            mBinding.textViewMainMagribTime.setText(dailyTimes.mMagrib);
-            mBinding.textViewMainIshaTime.setText(dailyTimes.mIsha);
+    private void showDialogPlusSettings() {
+        final boolean expanded = true;
+        final int gravity = Gravity.TOP;
+        final Holder holder = new ViewHolder(R.layout.dialogplus_content_settings);
+        final DialogPlusAdapter adapter = new DialogPlusAdapter(MainActivity.this);
+        final DialogPlusBuilder builder = DialogPlus.newDialog(this)
+                .setContentHolder(holder);
+        builder.setHeader(R.layout.dialogplus_header_settings);
+        builder.setFooter(R.layout.dialogplus_footer_settings);
+        builder.setCancelable(true)
+                .setGravity(gravity)
+                .setAdapter(adapter)
+                .setContentBackgroundResource(R.color.transparent)
+                .setOnClickListener((dialog, view) -> {
+                    final int viewId = view.getId();
+                    final AppCompatButton buttonA = findViewById(R.id.dialogplus_settings_content_buttonA);
+                    final AppCompatButton buttonB = findViewById(R.id.dialogplus_settings_content_buttonB);
+                    final AppCompatButton buttonC = findViewById(R.id.dialogplus_settings_content_buttonC);
+                    final AppCompatButton buttonSelect = findViewById(R.id.dialogplus_settings_footer_buttonSelect);
+                    if (viewId == R.id.dialogplus_settings_content_buttonB) {
+                        buttonA.setSelected(false);
+                        buttonB.setSelected(true);
+                        buttonC.setSelected(false);
+                        buttonSelect.setEnabled(true);
+                    } else if (viewId == R.id.dialogplus_settings_content_buttonC) {
+                        buttonA.setSelected(false);
+                        buttonB.setSelected(false);
+                        buttonC.setSelected(true);
+                        buttonSelect.setEnabled(true);
+                    } else if (viewId == R.id.dialogplus_settings_content_buttonA) {
+                        buttonA.setSelected(true);
+                        buttonB.setSelected(false);
+                        buttonC.setSelected(false);
+                        buttonSelect.setEnabled(true);
+                    } else if (viewId == R.id.dialogplus_settings_footer_buttonSelect) {
+                        if (buttonSelect.isEnabled()) {
+                            int selectedFragment = 1;
+                            if (buttonB.isSelected()) {
+                                selectedFragment = 2;
+                            } else if (buttonC.isSelected()) {
+                                selectedFragment = 3;
+                            }
+                            final SharedPreferences.Editor sharedPrefEditor = mSharedPreferences.edit();
+                            sharedPrefEditor.putInt("sp_current_fragment", selectedFragment);
+                            // Note: need to use commit() and not apply() below. Otherwise, the app restarts before data is written down.
+                            sharedPrefEditor.commit();
+                            selectFragment(selectedFragment);
+                            dialog.dismiss();
+                        }
+                    } else if (viewId == R.id.dialogplus_settings_footer_buttonCancel) {
+                        dialog.dismiss();
+                    }
+                })
+                .setContentHeight(ViewGroup.LayoutParams.WRAP_CONTENT)
+//                .setContentHeight((int)(800*mDp2pxFactor))
+//                .setExpanded(expanded)
+                .setExpanded(expanded, (int)(360*mDp2pxFactor))
+//                .setExpanded(expanded, 400)
+//                .setOnCancelListener(dialog -> toast("cancelled"))
+                .setOverlayBackgroundResource(android.R.color.transparent);
+        builder.create().show();
+    }
 
-            final int prayerIndex = mMainViewModel.getCurrentPrayerIndex();
-            switch (prayerIndex) {
-                case 1:
-                    mBinding.linearLayoutMainTimeFajr.setEnabled(true);
-                    mBinding.linearLayoutMainTimeShurooq.setEnabled(false);
-                    mBinding.linearLayoutMainTimeDuhr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeAsr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeMagrib.setEnabled(false);
-                    mBinding.linearLayoutMainTimeIsha.setEnabled(false);
-                    break;
-                case 2:
-                    mBinding.linearLayoutMainTimeFajr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeShurooq.setEnabled(true);
-                    mBinding.linearLayoutMainTimeDuhr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeAsr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeMagrib.setEnabled(false);
-                    mBinding.linearLayoutMainTimeIsha.setEnabled(false);
-                    break;
-                case 3:
-                    mBinding.linearLayoutMainTimeFajr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeShurooq.setEnabled(false);
-                    mBinding.linearLayoutMainTimeDuhr.setEnabled(true);
-                    mBinding.linearLayoutMainTimeAsr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeMagrib.setEnabled(false);
-                    mBinding.linearLayoutMainTimeIsha.setEnabled(false);
-                    break;
-                case 4:
-                    mBinding.linearLayoutMainTimeFajr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeShurooq.setEnabled(false);
-                    mBinding.linearLayoutMainTimeDuhr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeAsr.setEnabled(true);
-                    mBinding.linearLayoutMainTimeMagrib.setEnabled(false);
-                    mBinding.linearLayoutMainTimeIsha.setEnabled(false);
-                    break;
-                case 5:
-                    mBinding.linearLayoutMainTimeFajr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeShurooq.setEnabled(false);
-                    mBinding.linearLayoutMainTimeDuhr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeAsr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeMagrib.setEnabled(true);
-                    mBinding.linearLayoutMainTimeIsha.setEnabled(false);
-                    break;
-                case 6:
-                    mBinding.linearLayoutMainTimeFajr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeShurooq.setEnabled(false);
-                    mBinding.linearLayoutMainTimeDuhr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeAsr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeMagrib.setEnabled(false);
-                    mBinding.linearLayoutMainTimeIsha.setEnabled(true);
-                    break;
-                default:
-                    mBinding.linearLayoutMainTimeFajr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeShurooq.setEnabled(false);
-                    mBinding.linearLayoutMainTimeDuhr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeAsr.setEnabled(false);
-                    mBinding.linearLayoutMainTimeMagrib.setEnabled(false);
-                    mBinding.linearLayoutMainTimeIsha.setEnabled(false);
-                    break;
-            }
-            updateTextColors(prayerIndex);
 
-            /*
-            <TextView
-                android:textColor="@color/mainText"
-            <TextView
-                android:textColor="@color/mainText"
-            <TextView
-                android:textColor="@color/mainText"
-            <TextView
-                android:shadowColor="#50000000"
-                android:shadowDx="5"
-                android:shadowDy="5"
-                android:shadowRadius="9"
-                android:textColor="@color/mainText"
+    private void selectFragment(int fragmentIndex) {
+        final FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+        switch (fragmentIndex) {
+            case 1:
+                fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentA, null);
+                break;
+            case 2:
+                fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentB, null);
+                break;
+            case 3:
+                fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentC, null);
+                break;
+            default:
+                fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentA, null);
+                break;
 
-        <!-- Duhr -->
-            <TextView
-                android:textColor="@color/mainTextSelected"
-            <TextView
-                android:textColor="@color/mainTextSelected"
-            <TextView
-                android:textColor="@color/mainTextSelected"
-            <TextView
-                android:shadowColor="#50000000"
-                android:shadowDx="5"
-                android:shadowDy="5"
-                android:shadowRadius="9"
-                android:textColor="@color/mainTextSelected"
-             */
         }
+        mCurrentFragment = fragmentIndex;
+        fragmentTransaction.commit();
+        mMainViewModel.updateViews();
+        updateViews();
+    }
+
+    private void updateViews() {
         String dateFormat = "d\nMMMM\nyyyy";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
         mBinding.textViewMainDate.setText(simpleDateFormat.format(mCalendar.getTime()));
         final int dayOfWeek = mCalendar.get(Calendar.DAY_OF_WEEK) - 1;
-        mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n" + mDayNamesHebrew[dayOfWeek] + "\n" + mDayNamesArabic[dayOfWeek]);
-    }
-
-    private void updateTextColors(int prayerIndex) {
-        final int colorNotSelected = ContextCompat.getColor(this, R.color.mainText);
-        final int colorSelected = ContextCompat.getColor(this, R.color.mainTextSelected);
-        mBinding.textViewMainSabahAdiga.setTextColor(colorNotSelected);
-        mBinding.textViewMainSabahHebrew.setTextColor(colorNotSelected);
-        mBinding.textViewMainSabahArabic.setTextColor(colorNotSelected);
-        mBinding.textViewMainSabahTime.setTextColor(colorNotSelected);
-
-        mBinding.textViewMainShurooqAdiga.setTextColor(colorNotSelected);
-        mBinding.textViewMainShurooqHebrew.setTextColor(colorNotSelected);
-        mBinding.textViewMainShurooqArabic.setTextColor(colorNotSelected);
-        mBinding.textViewMainShurooqTime.setTextColor(colorNotSelected);
-
-        mBinding.textViewMainDuhrAdiga.setTextColor(colorNotSelected);
-        mBinding.textViewMainDuhrHebrew.setTextColor(colorNotSelected);
-        mBinding.textViewMainDuhrArabic.setTextColor(colorNotSelected);
-        mBinding.textViewMainDuhrTime.setTextColor(colorNotSelected);
-
-        mBinding.textViewMainAsrAdiga.setTextColor(colorNotSelected);
-        mBinding.textViewMainAsrHebrew.setTextColor(colorNotSelected);
-        mBinding.textViewMainAsrArabic.setTextColor(colorNotSelected);
-        mBinding.textViewMainAsrTime.setTextColor(colorNotSelected);
-
-        mBinding.textViewMainMagribAdiga.setTextColor(colorNotSelected);
-        mBinding.textViewMainMagribHebrew.setTextColor(colorNotSelected);
-        mBinding.textViewMainMagribArabic.setTextColor(colorNotSelected);
-        mBinding.textViewMainMagribTime.setTextColor(colorNotSelected);
-
-        mBinding.textViewMainIshaAdiga.setTextColor(colorNotSelected);
-        mBinding.textViewMainIshaHebrew.setTextColor(colorNotSelected);
-        mBinding.textViewMainIshaArabic.setTextColor(colorNotSelected);
-        mBinding.textViewMainIshaTime.setTextColor(colorNotSelected);
-
-        switch (prayerIndex) {
+        switch (mCurrentFragment) {
             case 1:
-                mBinding.textViewMainSabahAdiga.setTextColor(colorSelected);
-                mBinding.textViewMainSabahHebrew.setTextColor(colorSelected);
-                mBinding.textViewMainSabahArabic.setTextColor(colorSelected);
-                mBinding.textViewMainSabahTime.setTextColor(colorSelected);
+                mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n" + mDayNamesHebrew[dayOfWeek] + "\n" + mDayNamesArabic[dayOfWeek]);
                 break;
             case 2:
-                mBinding.textViewMainShurooqAdiga.setTextColor(colorSelected);
-                mBinding.textViewMainShurooqHebrew.setTextColor(colorSelected);
-                mBinding.textViewMainShurooqArabic.setTextColor(colorSelected);
-                mBinding.textViewMainShurooqTime.setTextColor(colorSelected);
+                mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n" + mDayNamesArabic[dayOfWeek]);
                 break;
             case 3:
-                mBinding.textViewMainDuhrAdiga.setTextColor(colorSelected);
-                mBinding.textViewMainDuhrHebrew.setTextColor(colorSelected);
-                mBinding.textViewMainDuhrArabic.setTextColor(colorSelected);
-                mBinding.textViewMainDuhrTime.setTextColor(colorSelected);
-                break;
-            case 4:
-                mBinding.textViewMainAsrAdiga.setTextColor(colorSelected);
-                mBinding.textViewMainAsrHebrew.setTextColor(colorSelected);
-                mBinding.textViewMainAsrArabic.setTextColor(colorSelected);
-                mBinding.textViewMainAsrTime.setTextColor(colorSelected);
-                break;
-            case 5:
-                mBinding.textViewMainMagribAdiga.setTextColor(colorSelected);
-                mBinding.textViewMainMagribHebrew.setTextColor(colorSelected);
-                mBinding.textViewMainMagribArabic.setTextColor(colorSelected);
-                mBinding.textViewMainMagribTime.setTextColor(colorSelected);
-                break;
-            case 6:
-                mBinding.textViewMainIshaAdiga.setTextColor(colorSelected);
-                mBinding.textViewMainIshaHebrew.setTextColor(colorSelected);
-                mBinding.textViewMainIshaArabic.setTextColor(colorSelected);
-                mBinding.textViewMainIshaTime.setTextColor(colorSelected);
+                mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n");
                 break;
             default:
+                mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n" + mDayNamesHebrew[dayOfWeek] + "\n" + mDayNamesArabic[dayOfWeek]);
                 break;
         }
     }
 
     private void shareScreenshot(boolean shareToGallery) {
-//        LinearLayout view = this.findViewById(R.id.linearLayoutPublishFrame);
         final ConstraintLayout view = mBinding.constraintLayoutMainFullScreen;
         int width = view.getWidth();
         int height = view.getHeight();
@@ -341,8 +270,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Calendar mCalendar;
     private DatePickerDialog.OnDateSetListener mDatePickerDateSetListener;
+    private Calendar mCalendar;
     private String[] mDayNamesAdiga = new String[] {
             "Thawmaf",
             "Blıpe",
@@ -389,6 +318,14 @@ public class MainActivity extends AppCompatActivity {
             "שבת"
     };
 
+    private FragmentManager mFragmentManager;
+    private DailyTimesFragmentA mDailyTimesFragmentA;
+    private DailyTimesFragmentB mDailyTimesFragmentB;
+    private DailyTimesFragmentC mDailyTimesFragmentC;
+
+    private int mCurrentFragment = 1;
+
+    protected float mDp2pxFactor = 0;
     private ActivityMainBinding mBinding;
     private MainViewModel mMainViewModel;
     private SharedPreferences mSharedPreferences = null;

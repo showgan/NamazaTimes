@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layoutDirection="ltr"
+    android:background="@color/dialogplus_background_settings">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/dialogplus_settings_footer_buttonCancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="100dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:text="Cancel"
+        android:enabled="true"
+        android:textAllCaps="false"
+        android:gravity="center"
+        android:textStyle="normal"
+        android:textSize="18dp"
+        android:textColor="@color/black"
+        android:shadowColor="#60000000"
+        android:shadowDx="-5"
+        android:shadowDy="5"
+        android:shadowRadius="10"
+        android:background="@drawable/dialogplus_settings_background_select"
+        android:outlineProvider="background"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/dialogplus_settings_footer_buttonSelect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginEnd="100dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="16dp"
+        android:text="Select"
+        android:enabled="false"
+        android:textAllCaps="false"
+        android:gravity="center"
+        android:textStyle="normal"
+        android:textSize="18dp"
+        android:textColor="@color/black"
+        android:shadowColor="#60000000"
+        android:shadowDx="-5"
+        android:shadowDy="5"
+        android:shadowRadius="10"
+        android:background="@drawable/dialogplus_settings_background_select"
+        android:outlineProvider="background"/>
+</LinearLayout>

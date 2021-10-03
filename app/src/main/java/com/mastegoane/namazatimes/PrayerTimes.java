@@ -3,6 +3,8 @@ package com.mastegoane.namazatimes;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,13 +19,13 @@ import java.util.List;
 public class PrayerTimes {
     public PrayerTimes() {
         mTimeTable = new ArrayMap<>();
-        mCalendar = Calendar.getInstance();
+        mCalendarLD = new MutableLiveData<>(Calendar.getInstance());
         mDateFormat = new SimpleDateFormat("dd,mm");
-        mDaylightTime = mCalendar.getTimeZone().inDaylightTime(mCalendar.getTime());
+        mDaylightTime = mCalendarLD.getValue().getTimeZone().inDaylightTime(mCalendarLD.getValue().getTime());
     }
 
-    public Calendar getCalendar() {
-        return mCalendar;
+    public LiveData<Calendar> getCalendar() {
+        return mCalendarLD;
     }
 
     public ArrayMap<String, DailyTimes> getTimeTable() {
@@ -51,13 +53,12 @@ public class PrayerTimes {
         dailyTimes.mAsr = toDaylightTime(dailyTimes.mAsr);
         dailyTimes.mMagrib = toDaylightTime(dailyTimes.mMagrib);
         dailyTimes.mIsha = toDaylightTime(dailyTimes.mIsha);
-
         return dailyTimes;
     }
 
     public DailyTimes getTodaysTimes() {
-        final int day = mCalendar.get(Calendar.DAY_OF_MONTH);
-        final int month = mCalendar.get(Calendar.MONTH) + 1;
+        final int day = mCalendarLD.getValue().get(Calendar.DAY_OF_MONTH);
+        final int month = mCalendarLD.getValue().get(Calendar.MONTH) + 1;
         String key = day + "," + month;
         DailyTimes dailyTimes = mTimeTable.get(key);
         return dailyTimes;
@@ -150,18 +151,16 @@ public class PrayerTimes {
     public int getCurrentPrayerIndex() {
         final String dateFormat = "HH:mm";
         final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
-        final Date currentTime = mCalendar.getTime();
+        final Date currentTime = mCalendarLD.getValue().getTime();
         final Calendar temporaryCalendar = Calendar.getInstance();
         temporaryCalendar.setTime(currentTime);
         final int currentTimeInMinutes = temporaryCalendar.get(Calendar.HOUR_OF_DAY) * 60 + temporaryCalendar.get(Calendar.MINUTE);
-        Log.d(TAG, "YYY1c currentTime: " + currentTime.toString());
         final DailyTimes dailyTimes = getTodaysTimes();
         try {
             Date timeToCheck = simpleDateFormat.parse(dailyTimes.mIsha);
             if (timeToCheck == null) {
                 return 0;
             }
-            Log.d(TAG, "YYY1d timeToCheck: " + timeToCheck.toString());
             temporaryCalendar.setTime(timeToCheck);
             int timeToCheckInMinutes = temporaryCalendar.get(Calendar.HOUR_OF_DAY) * 60 + temporaryCalendar.get(Calendar.MINUTE);
             if (timeToCheckInMinutes < currentTimeInMinutes) {
@@ -226,7 +225,6 @@ public class PrayerTimes {
             mAsr = asr;
             mMagrib = magrib;
             mIsha = isha;
-
             // remove the "0" prefix from the "hour" if it has it
             mFajr = mFajr.replaceFirst("^0", "");
             mShurooq = mShurooq.replaceFirst("^0", "");
@@ -249,7 +247,7 @@ public class PrayerTimes {
 
 
     private ArrayMap<String, DailyTimes> mTimeTable;
-    private Calendar mCalendar;
+    private final MutableLiveData<Calendar> mCalendarLD;
     private final SimpleDateFormat mDateFormat;
     private boolean mDaylightTime;
 
