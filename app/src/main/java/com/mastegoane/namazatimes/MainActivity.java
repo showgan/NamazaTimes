@@ -246,12 +246,16 @@ public class MainActivity extends AppCompatActivity {
             outputStream.close();
         } catch (Exception exception) {
             exception.printStackTrace();
+            Toast.makeText(this, "COULD NOT OPEN FILE FOR SAVING SCREENSHOT", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         try {
             mediaPath = MediaStore.Images.Media.insertImage(this.getContentResolver(), outputFilePath, null, null);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            Toast.makeText(this, "COULD NOT SAVE SCREENSHOT TO GALLERY", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         if (shareToGallery) {
