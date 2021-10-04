@@ -147,7 +147,7 @@
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="@font/corbel"
                 android:textColor="@color/mainText"
-                android:text="Yeked"
+                android:text="Yeḱed"
                 android:layout_weight="1.0" />
             <TextView
                 android:id="@+id/textViewMainAsrTime"
@@ -249,6 +249,6 @@
         android:paddingVertical="8dp"
         android:background="#F5F5F5"
         android:textSize="12sp"
-        android:text="Akše Camıye Waḣtex"
+        android:text="Akše Camiye Waḣtex"
         app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

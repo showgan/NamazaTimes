@@ -276,10 +276,10 @@ public class MainActivity extends AppCompatActivity {
             "Thawmaf",
             "Blıpe",
             "Ğubcı",
-            "Bereskéjiy",
-            "Mefeḱu",
-            "Bereskefu",
-            "Mefezako"
+            "Beresḱéjiy",
+            "Mefeḱu'",
+            "Beresḱefu'",
+            "Mefezaku'"
     };
     private String[] mDayNamesEnglish = new String[] {
             "Sunday",
