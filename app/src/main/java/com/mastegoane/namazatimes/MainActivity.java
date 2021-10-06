@@ -3,12 +3,17 @@ package com.mastegoane.namazatimes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContentResolverCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import android.app.DatePickerDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
@@ -34,6 +39,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -237,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
         view.draw(canvas);
         final String outputFilePath = outputDir.getAbsolutePath() + File.separator + "question2share.webp";
         Log.d("Writing file", outputFilePath);
-        String mediaPath = "";
+        String mediaPath;
         try {
             File outputFile = new File(outputFilePath);
             OutputStream outputStream = new FileOutputStream(outputFile);
@@ -251,10 +257,36 @@ public class MainActivity extends AppCompatActivity {
         }
 
         try {
+            Intent intent = getIntent();
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            List<ResolveInfo> resInfoList = getApplicationContext().getPackageManager()
+//                    .queryIntentActivities(getIntent(), PackageManager.MATCH_DEFAULT_ONLY);
+//            for (ResolveInfo resolveInfo : resInfoList) {
+//                String packageName = resolveInfo.activityInfo.packageName;
+//                getApplicationContext().grantUriPermission(packageName, uri, flag);
+//            }
+
+//            Log.d(TAG, "YYY123a outputFilePath: " + outputFilePath);
+            ContentResolver contentResolver = this.getContentResolver();
+//            Log.d(TAG, "YYY123b contentResolver: " + contentResolver.toString());
             mediaPath = MediaStore.Images.Media.insertImage(this.getContentResolver(), outputFilePath, null, null);
+//            ContentValues contentValues = new ContentValues();
+//            contentValues.put(MediaStore.Images.Media.TITLE, "Title");
+//            contentValues.put(MediaStore.Images.Media.DESCRIPTION, "From Camera");
+//            Uri path = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+
+//            Log.d(TAG, "YYY123c mediaPath: " + mediaPath);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             Toast.makeText(this, "COULD NOT SAVE SCREENSHOT TO GALLERY", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (mediaPath == null || mediaPath.equals("")) {
+            Toast.makeText(this, "SOMETHING WENT WRONG WHILE TRYING TO SAVE SCREENSHOT TO GALLERY", Toast.LENGTH_SHORT).show();
             return;
         }
 

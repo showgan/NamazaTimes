@@ -56,6 +56,30 @@ public class PrayerTimes {
         return dailyTimes;
     }
 
+    private String toTwelveHourFormat(String time) {
+        final String[] hourAndMinutes = time.split(":");
+        final String hourStr = hourAndMinutes[0];
+        final String minuteStr = hourAndMinutes[1];
+        //int hour = Integer.parseInt(time.substring(0, 2)) + 1;
+        int hour = Integer.parseInt(hourStr);
+        if (hour > 12) {
+            hour = hour - 12;
+        }
+        time = hour + ":" + minuteStr;
+        return time;
+    }
+
+    private DailyTimes toTwelveHourFormat(DailyTimes dailyTimes) {
+        dailyTimes.mFajr = toTwelveHourFormat(dailyTimes.mFajr);
+        dailyTimes.mShurooq = toTwelveHourFormat(dailyTimes.mShurooq);
+        dailyTimes.mDuhr = toTwelveHourFormat(dailyTimes.mDuhr);
+        dailyTimes.mAsr = toTwelveHourFormat(dailyTimes.mAsr);
+        dailyTimes.mMagrib = toTwelveHourFormat(dailyTimes.mMagrib);
+        dailyTimes.mIsha = toTwelveHourFormat(dailyTimes.mIsha);
+        return dailyTimes;
+    }
+
+
     public DailyTimes getTodaysTimes() {
         final int day = mCalendarLD.getValue().get(Calendar.DAY_OF_MONTH);
         final int month = mCalendarLD.getValue().get(Calendar.MONTH) + 1;
@@ -103,6 +127,7 @@ public class PrayerTimes {
                     if (mDaylightTime) {
                         dailyTimes = toDaylightTime(dailyTimes);
                     }
+                    dailyTimes = toTwelveHourFormat(dailyTimes);
 
                     final String dateStr = day + "," + month;
                     addTime(dateStr, dailyTimes);
@@ -163,7 +188,7 @@ public class PrayerTimes {
             }
             temporaryCalendar.setTime(timeToCheck);
             int timeToCheckInMinutes = temporaryCalendar.get(Calendar.HOUR_OF_DAY) * 60 + temporaryCalendar.get(Calendar.MINUTE);
-            if (timeToCheckInMinutes < currentTimeInMinutes) {
+            if (timeToCheckInMinutes <= currentTimeInMinutes) {
                 return 6;
             }
             timeToCheck = simpleDateFormat.parse(dailyTimes.mMagrib);
@@ -172,7 +197,7 @@ public class PrayerTimes {
             }
             temporaryCalendar.setTime(timeToCheck);
             timeToCheckInMinutes = temporaryCalendar.get(Calendar.HOUR_OF_DAY) * 60 + temporaryCalendar.get(Calendar.MINUTE);
-            if (timeToCheckInMinutes < currentTimeInMinutes) {
+            if (timeToCheckInMinutes <= currentTimeInMinutes) {
                 return 5;
             }
             timeToCheck = simpleDateFormat.parse(dailyTimes.mAsr);
@@ -181,7 +206,7 @@ public class PrayerTimes {
             }
             temporaryCalendar.setTime(timeToCheck);
             timeToCheckInMinutes = temporaryCalendar.get(Calendar.HOUR_OF_DAY) * 60 + temporaryCalendar.get(Calendar.MINUTE);
-            if (timeToCheckInMinutes < currentTimeInMinutes) {
+            if (timeToCheckInMinutes <= currentTimeInMinutes) {
                 return 4;
             }
             timeToCheck = simpleDateFormat.parse(dailyTimes.mDuhr);
@@ -190,7 +215,7 @@ public class PrayerTimes {
             }
             temporaryCalendar.setTime(timeToCheck);
             timeToCheckInMinutes = temporaryCalendar.get(Calendar.HOUR_OF_DAY) * 60 + temporaryCalendar.get(Calendar.MINUTE);
-            if (timeToCheckInMinutes < currentTimeInMinutes) {
+            if (timeToCheckInMinutes <= currentTimeInMinutes) {
                 return 3;
             }
             timeToCheck = simpleDateFormat.parse(dailyTimes.mShurooq);
@@ -199,7 +224,7 @@ public class PrayerTimes {
             }
             temporaryCalendar.setTime(timeToCheck);
             timeToCheckInMinutes = temporaryCalendar.get(Calendar.HOUR_OF_DAY) * 60 + temporaryCalendar.get(Calendar.MINUTE);
-            if (timeToCheckInMinutes < currentTimeInMinutes) {
+            if (timeToCheckInMinutes <= currentTimeInMinutes) {
                 return 2;
             }
             timeToCheck = simpleDateFormat.parse(dailyTimes.mFajr);
@@ -208,7 +233,7 @@ public class PrayerTimes {
             }
             temporaryCalendar.setTime(timeToCheck);
             timeToCheckInMinutes = temporaryCalendar.get(Calendar.HOUR_OF_DAY) * 60 + temporaryCalendar.get(Calendar.MINUTE);
-            if (timeToCheckInMinutes < currentTimeInMinutes) {
+            if (timeToCheckInMinutes <= currentTimeInMinutes) {
                 return 1;
             }
         } catch (ParseException e) {
