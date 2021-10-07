@@ -85,13 +85,12 @@ public class DailyTimesFragmentB extends Fragment {
     private void updateViews() {
         final PrayerTimes.DailyTimes dailyTimes = mMainViewModel.getTodaysTimes();
         if (dailyTimes != null) {
-            mBinding.textViewMainSabahTime.setText(dailyTimes.mFajr);
-            mBinding.textViewMainShurooqTime.setText(dailyTimes.mShurooq);
-            mBinding.textViewMainDuhrTime.setText(dailyTimes.mDuhr);
-            mBinding.textViewMainAsrTime.setText(dailyTimes.mAsr);
-            mBinding.textViewMainMagribTime.setText(dailyTimes.mMagrib);
-            mBinding.textViewMainIshaTime.setText(dailyTimes.mIsha);
-
+            mBinding.textViewMainSabahTime.setText(dailyTimes.getTimeOf("fajr", true));
+            mBinding.textViewMainShurooqTime.setText(dailyTimes.getTimeOf("shurooq", true));
+            mBinding.textViewMainDuhrTime.setText(dailyTimes.getTimeOf("duhr", true));
+            mBinding.textViewMainAsrTime.setText(dailyTimes.getTimeOf("asr", true));
+            mBinding.textViewMainMagribTime.setText(dailyTimes.getTimeOf("magrib", true));
+            mBinding.textViewMainIshaTime.setText(dailyTimes.getTimeOf("isha", true));
             final int prayerIndex = mMainViewModel.getCurrentPrayerIndex();
             switch (prayerIndex) {
                 case 1:

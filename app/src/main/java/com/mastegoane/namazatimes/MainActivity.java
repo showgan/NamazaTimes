@@ -262,23 +262,7 @@ public class MainActivity extends AppCompatActivity {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            List<ResolveInfo> resInfoList = getApplicationContext().getPackageManager()
-//                    .queryIntentActivities(getIntent(), PackageManager.MATCH_DEFAULT_ONLY);
-//            for (ResolveInfo resolveInfo : resInfoList) {
-//                String packageName = resolveInfo.activityInfo.packageName;
-//                getApplicationContext().grantUriPermission(packageName, uri, flag);
-//            }
-
-//            Log.d(TAG, "YYY123a outputFilePath: " + outputFilePath);
-            ContentResolver contentResolver = this.getContentResolver();
-//            Log.d(TAG, "YYY123b contentResolver: " + contentResolver.toString());
             mediaPath = MediaStore.Images.Media.insertImage(this.getContentResolver(), outputFilePath, null, null);
-//            ContentValues contentValues = new ContentValues();
-//            contentValues.put(MediaStore.Images.Media.TITLE, "Title");
-//            contentValues.put(MediaStore.Images.Media.DESCRIPTION, "From Camera");
-//            Uri path = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-
-//            Log.d(TAG, "YYY123c mediaPath: " + mediaPath);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             Toast.makeText(this, "COULD NOT SAVE SCREENSHOT TO GALLERY", Toast.LENGTH_SHORT).show();

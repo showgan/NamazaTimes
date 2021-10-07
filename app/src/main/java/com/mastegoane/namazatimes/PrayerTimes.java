@@ -56,28 +56,28 @@ public class PrayerTimes {
         return dailyTimes;
     }
 
-    private String toTwelveHourFormat(String time) {
-        final String[] hourAndMinutes = time.split(":");
-        final String hourStr = hourAndMinutes[0];
-        final String minuteStr = hourAndMinutes[1];
-        //int hour = Integer.parseInt(time.substring(0, 2)) + 1;
-        int hour = Integer.parseInt(hourStr);
-        if (hour > 12) {
-            hour = hour - 12;
-        }
-        time = hour + ":" + minuteStr;
-        return time;
-    }
-
-    private DailyTimes toTwelveHourFormat(DailyTimes dailyTimes) {
-        dailyTimes.mFajr = toTwelveHourFormat(dailyTimes.mFajr);
-        dailyTimes.mShurooq = toTwelveHourFormat(dailyTimes.mShurooq);
-        dailyTimes.mDuhr = toTwelveHourFormat(dailyTimes.mDuhr);
-        dailyTimes.mAsr = toTwelveHourFormat(dailyTimes.mAsr);
-        dailyTimes.mMagrib = toTwelveHourFormat(dailyTimes.mMagrib);
-        dailyTimes.mIsha = toTwelveHourFormat(dailyTimes.mIsha);
-        return dailyTimes;
-    }
+//    private String toTwelveHourFormat(String time) {
+//        final String[] hourAndMinutes = time.split(":");
+//        final String hourStr = hourAndMinutes[0];
+//        final String minuteStr = hourAndMinutes[1];
+//        //int hour = Integer.parseInt(time.substring(0, 2)) + 1;
+//        int hour = Integer.parseInt(hourStr);
+//        if (hour > 12) {
+//            hour = hour - 12;
+//        }
+//        time = hour + ":" + minuteStr;
+//        return time;
+//    }
+//
+//    private DailyTimes toTwelveHourFormat(DailyTimes dailyTimes) {
+//        dailyTimes.mFajr = toTwelveHourFormat(dailyTimes.mFajr);
+//        dailyTimes.mShurooq = toTwelveHourFormat(dailyTimes.mShurooq);
+//        dailyTimes.mDuhr = toTwelveHourFormat(dailyTimes.mDuhr);
+//        dailyTimes.mAsr = toTwelveHourFormat(dailyTimes.mAsr);
+//        dailyTimes.mMagrib = toTwelveHourFormat(dailyTimes.mMagrib);
+//        dailyTimes.mIsha = toTwelveHourFormat(dailyTimes.mIsha);
+//        return dailyTimes;
+//    }
 
 
     public DailyTimes getTodaysTimes() {
@@ -127,7 +127,7 @@ public class PrayerTimes {
                     if (mDaylightTime) {
                         dailyTimes = toDaylightTime(dailyTimes);
                     }
-                    dailyTimes = toTwelveHourFormat(dailyTimes);
+//                    dailyTimes = toTwelveHourFormat(dailyTimes);
 
                     final String dateStr = day + "," + month;
                     addTime(dateStr, dailyTimes);
@@ -141,9 +141,9 @@ public class PrayerTimes {
         }
     }
 
-    public void loadTable(InputStream inputStream, List<String[]> tokenizedLines, String delimiterEpression) {
+    public void loadTable(InputStream inputStream, List<String[]> tokenizedLines, String delimiterExpression) {
         mInputStream = inputStream;
-        mDelimiterEpression = delimiterEpression;
+        mDelimiterExpression = delimiterExpression;
         mTokenizedLines = tokenizedLines;
         new Thread(new Runnable() {
             public void run() {
@@ -161,7 +161,7 @@ public class PrayerTimes {
         try {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] tokens = TextUtils.split(line, mDelimiterEpression);
+                String[] tokens = TextUtils.split(line, mDelimiterExpression);
                 if (line.trim().startsWith("#") || tokens.length == 0) {
                     // skip comment lines and empty/space lines
                     continue;
@@ -174,8 +174,7 @@ public class PrayerTimes {
     }
 
     public int getCurrentPrayerIndex() {
-        final String dateFormat = "HH:mm";
-        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
         final Date currentTime = mCalendarLD.getValue().getTime();
         final Calendar temporaryCalendar = Calendar.getInstance();
         temporaryCalendar.setTime(currentTime);
@@ -258,18 +257,74 @@ public class PrayerTimes {
             mMagrib = mMagrib.replaceFirst("^0", "");
             mIsha = mIsha.replaceFirst("^0", "");
         }
-        public String mFajr;
-        public String mShurooq;
-        public String mDuhr;
-        public String mAsr;
-        public String mMagrib;
-        public String mIsha;
+
+        public String getTimeOf(String prayerName, boolean is12HourFormat) {
+            String prayerTime;
+            switch (prayerName.toLowerCase()) {
+                case "fajr":
+                    prayerTime = mFajr;
+                    break;
+                case "shurooq":
+                    prayerTime = mShurooq;
+                    break;
+                case "duhr":
+                    prayerTime = mDuhr;
+                    break;
+                case "asr":
+                    prayerTime = mAsr;
+                    break;
+                case "magrib":
+                    prayerTime = mMagrib;
+                    break;
+                case "isha":
+                    prayerTime = mIsha;
+                    break;
+                default:
+                    Log.e(TAG, "BUG getTimeOf() got illegal prayer name: " + prayerName);
+                    prayerTime = mFajr;
+                    break;
+            }
+            if (is12HourFormat) {
+                return toTwelveHourFormat(prayerTime);
+            } else {
+                return prayerTime;
+            }
+        }
+
+        private String toTwelveHourFormat(String time) {
+            final String[] hourAndMinutes = time.split(":");
+            final String hourStr = hourAndMinutes[0];
+            final String minuteStr = hourAndMinutes[1];
+            //int hour = Integer.parseInt(time.substring(0, 2)) + 1;
+            int hour = Integer.parseInt(hourStr);
+            if (hour > 12) {
+                hour = hour - 12;
+            }
+            time = hour + ":" + minuteStr;
+            return time;
+        }
+
+//        private DailyTimes toTwelveHourFormat(DailyTimes dailyTimes) {
+//            dailyTimes.mFajr = toTwelveHourFormat(dailyTimes.mFajr);
+//            dailyTimes.mShurooq = toTwelveHourFormat(dailyTimes.mShurooq);
+//            dailyTimes.mDuhr = toTwelveHourFormat(dailyTimes.mDuhr);
+//            dailyTimes.mAsr = toTwelveHourFormat(dailyTimes.mAsr);
+//            dailyTimes.mMagrib = toTwelveHourFormat(dailyTimes.mMagrib);
+//            dailyTimes.mIsha = toTwelveHourFormat(dailyTimes.mIsha);
+//            return dailyTimes;
+//        }
+
+        private String mFajr;
+        private String mShurooq;
+        private String mDuhr;
+        private String mAsr;
+        private String mMagrib;
+        private String mIsha;
     }
 
     private InputStream mInputStream;
-    private String mDelimiterEpression;
+    private String mDelimiterExpression;
     private List<String[]> mTokenizedLines;
-
 
     private ArrayMap<String, DailyTimes> mTimeTable;
     private final MutableLiveData<Calendar> mCalendarLD;
