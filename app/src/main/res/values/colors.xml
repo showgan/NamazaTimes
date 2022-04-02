@@ -10,9 +10,12 @@
 
     <color name="mainText">#575756</color>
     <color name="mainTextSelected">#FFFFFF</color>
+    <color name="menu_icon1">#575756</color>
     <color name="mainBackground">#FFFFFF</color>
     <color name="mainBackgroundSelected">#53BEC7</color>
     <color name="mainBackgroundShadow">#bdbdbd</color>
     <color name="transparent">#00000000</color>
     <color name="dialogplus_background_settings">#c0A8DDFF</color>
+
+<!--    <color name="colorAccent">#228844</color>-->
 </resources>

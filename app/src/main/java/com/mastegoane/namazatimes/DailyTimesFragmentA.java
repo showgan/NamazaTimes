@@ -66,7 +66,6 @@ public class DailyTimesFragmentA extends Fragment {
         mBinding = FragmentDailyTimesABinding.inflate(inflater, container, false);
         View view = mBinding.getRoot();
         return view;
-
     }
 
     @Override

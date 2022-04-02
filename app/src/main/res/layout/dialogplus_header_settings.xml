@@ -15,10 +15,6 @@
         android:text="Please Select Languages"
         android:gravity="center"
         android:textStyle="normal"
-        android:textSize="21dp"
-        android:textColor="@color/black"
-        android:shadowColor="#60000000"
-        android:shadowDx="-5"
-        android:shadowDy="5"
-        android:shadowRadius="10"/>
+        android:textSize="@dimen/dialog_text_size2"
+        android:textColor="@color/black"/>
 </LinearLayout>

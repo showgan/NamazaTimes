@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="100dp"
+        android:layout_marginStart="@dimen/margin2"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="16dp"
         android:text="Cancel"
@@ -20,21 +20,18 @@
         android:textAllCaps="false"
         android:gravity="center"
         android:textStyle="normal"
-        android:textSize="18dp"
+        android:textSize="@dimen/dialog_text_size1"
         android:textColor="@color/black"
-        android:shadowColor="#60000000"
-        android:shadowDx="-5"
-        android:shadowDy="5"
-        android:shadowRadius="10"
-        android:background="@drawable/dialogplus_settings_background_select"
+        android:background="@drawable/dialogplus_settings_background_select_enabled"
         android:outlineProvider="background"/>
+<!--    android:background="@drawable/dialogplus_settings_background_select"-->
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/dialogplus_settings_footer_buttonSelect"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginEnd="100dp"
+        android:layout_marginEnd="@dimen/margin2"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="16dp"
         android:text="Select"
@@ -42,12 +39,9 @@
         android:textAllCaps="false"
         android:gravity="center"
         android:textStyle="normal"
-        android:textSize="18dp"
+        android:textSize="@dimen/dialog_text_size1"
         android:textColor="@color/black"
-        android:shadowColor="#60000000"
-        android:shadowDx="-5"
-        android:shadowDy="5"
-        android:shadowRadius="10"
-        android:background="@drawable/dialogplus_settings_background_select"
+        android:background="@drawable/dialogplus_settings_background_select_enabled"
         android:outlineProvider="background"/>
+<!--    android:background="@drawable/dialogplus_settings_background_select"-->
 </LinearLayout>

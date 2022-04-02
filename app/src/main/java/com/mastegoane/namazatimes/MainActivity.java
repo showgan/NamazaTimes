@@ -3,17 +3,16 @@ package com.mastegoane.namazatimes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContentResolverCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
+import android.Manifest;
 import android.app.DatePickerDialog;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
@@ -39,7 +38,6 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -65,9 +63,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mMainViewModel = new ViewModelProvider(this,
-                ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication()))
+                (ViewModelProvider.Factory) ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication()))
                 .get(MainViewModel.class);
         mBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
@@ -100,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                     showDialogPlusSettings();
                     return true;
             }
-            return false;
+            return true;
         });
 
         mDatePickerDateSetListener = new DatePickerDialog.OnDateSetListener() {
@@ -117,7 +114,42 @@ public class MainActivity extends AppCompatActivity {
 
         mMainViewModel.readPrayerTimes();
         updateViews();
+
+        // TODO related to adding notifications
+//        createNotificationChannel();
+//        showNotification("801", "666");
     }
+
+    // TODO related to adding notifications
+//    private void createNotificationChannel() {
+//        // Create the NotificationChannel, but only on API 26+ because
+//        // the NotificationChannel class is new and not in the support library
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            NotificationChannel channel = new NotificationChannel(mNotificationChannelId, "Namaza", NotificationManager.IMPORTANCE_DEFAULT);
+//            channel.setDescription("Namaza");
+//            channel.enableVibration(true);
+//            channel.setVibrationPattern(new long[]{100, 100, 100, 600, 100, 300, 100, 350});
+//            channel.setSound(null, null);
+//            // Register the channel with the system; you can't change the importance
+//            // or other notification behaviors after this
+//            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+//            notificationManager.createNotificationChannel(channel);
+//        }
+//    }
+
+    // TODO related to adding notifications
+//    private void showNotification(String title, String content) {
+//        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, mNotificationChannelId)
+//                .setSmallIcon(R.drawable.prayer_times_icon)
+//                .setContentTitle(title)
+//                .setContentText(content)
+//                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//                .setAutoCancel(true);
+//        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+//        // notificationId is a unique int for each notification that you must define
+//        final int notificationId = 145;
+//        notificationManager.notify(notificationId, builder.build());
+//    }
 
     private void showDialogPlusSettings() {
         final boolean expanded = true;
@@ -228,6 +260,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void shareScreenshot(boolean shareToGallery) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        }
+
         final ConstraintLayout view = mBinding.constraintLayoutMainFullScreen;
         int width = view.getWidth();
         int height = view.getHeight();
@@ -262,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mediaPath = MediaStore.Images.Media.insertImage(this.getContentResolver(), outputFilePath, null, null);
+            mediaPath = MediaStore.Images.Media.insertImage(this.getContentResolver(), outputFilePath, "IMG_" + System.currentTimeMillis(), null);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             Toast.makeText(this, "COULD NOT SAVE SCREENSHOT TO GALLERY", Toast.LENGTH_SHORT).show();
@@ -285,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
             intentShare.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 //            intentShare.putExtra(Intent.EXTRA_STREAM, Uri.parse(outputFilePath));
             intentShare.putExtra(Intent.EXTRA_STREAM, Uri.parse(mediaPath));
-            intentShare.setPackage("com.whatsapp");
+//            intentShare.setPackage("com.whatsapp");
             startActivity(Intent.createChooser(intentShare, "Share Image"));
         }
     }
@@ -349,6 +385,9 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding mBinding;
     private MainViewModel mMainViewModel;
     private SharedPreferences mSharedPreferences = null;
+
+    // TODO related to adding notifications
+//    private final String mNotificationChannelId = "namaza1";
 
     private static final String TAG = MainActivity.class.getSimpleName();
 }

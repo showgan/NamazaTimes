@@ -18,12 +18,8 @@
         android:text="Adıǵe + العربية + עברית"
         android:gravity="center"
         android:textStyle="normal"
-        android:textSize="18dp"
+        android:textSize="@dimen/dialog_text_size1"
         android:textColor="@color/black"
-        android:shadowColor="#60000000"
-        android:shadowDx="-5"
-        android:shadowDy="5"
-        android:shadowRadius="10"
         android:background="@drawable/dialogplus_settings_background_option"
         android:outlineProvider="background"/>
 
@@ -38,12 +34,8 @@
         android:text="Adıǵe + العربية"
         android:gravity="center"
         android:textStyle="normal"
-        android:textSize="18dp"
+        android:textSize="@dimen/dialog_text_size1"
         android:textColor="@color/black"
-        android:shadowColor="#60000000"
-        android:shadowDx="-5"
-        android:shadowDy="5"
-        android:shadowRadius="10"
         android:background="@drawable/dialogplus_settings_background_option"
         android:outlineProvider="background"/>
 
@@ -58,12 +50,8 @@
         android:text="Adıǵe"
         android:gravity="center"
         android:textStyle="normal"
-        android:textSize="18dp"
+        android:textSize="@dimen/dialog_text_size1"
         android:textColor="@color/black"
-        android:shadowColor="#60000000"
-        android:shadowDx="-5"
-        android:shadowDy="5"
-        android:shadowRadius="10"
         android:background="@drawable/dialogplus_settings_background_option"
         android:outlineProvider="background"/>
 </LinearLayout>

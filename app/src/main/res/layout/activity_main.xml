@@ -118,6 +118,8 @@
         android:layout_height="wrap_content"
         android:background="#ffffff"
         app:itemRippleColor="#D50000"
+        app:itemIconTint="@color/mainBackgroundSelected"
+        app:itemIconSize="@dimen/icon_size1"
         android:defaultFocusHighlightEnabled="true"
         app:menu="@menu/navigation_menu"
         app:labelVisibilityMode="unlabeled"

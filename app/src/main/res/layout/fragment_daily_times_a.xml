@@ -374,21 +374,24 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_horizontal|center_vertical"
-            android:textSize="12sp"
+            android:textSize="@dimen/sub_title"
+            android:textColor="@color/mainText"
             android:text="Akše Camiye Waḣtex"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_horizontal|center_vertical"
-            android:textSize="12sp"
+            android:textSize="@dimen/sub_title"
+            android:textColor="@color/mainText"
             android:text="זמני מסגד אל-אקסא"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_horizontal|center_vertical"
-            android:textSize="12sp"
+            android:textSize="@dimen/sub_title"
+            android:textColor="@color/mainText"
             android:text="مواقيت المسجد الأقصى"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

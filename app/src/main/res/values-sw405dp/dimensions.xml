@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="main_prayer_name">23dp</dimen>
+    <dimen name="main_prayer_time">30dp</dimen>
+    <dimen name="sub_title">13dp</dimen>
+<!--    <dimen name="margin1">7dp</dimen>-->
+<!--    <dimen name="margin2">70dp</dimen>-->
+    <dimen name="icon_size1">30dp</dimen>
+
+    <dimen name="dialog_text_size1">25dp</dimen>
+    <dimen name="dialog_text_size2">29dp</dimen>
+</resources>

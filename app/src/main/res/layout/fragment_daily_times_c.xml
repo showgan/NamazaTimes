@@ -248,7 +248,8 @@
         android:layoutDirection="ltr"
         android:paddingVertical="8dp"
         android:background="#F5F5F5"
-        android:textSize="12sp"
+        android:textSize="@dimen/sub_title"
+        android:textColor="@color/mainText"
         android:text="Akše Camiye Waḣtex"
         app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

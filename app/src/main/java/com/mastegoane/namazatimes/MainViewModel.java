@@ -15,6 +15,8 @@ public class MainViewModel extends AndroidViewModel {
         super(application);
         mApplication = application;
         mResources = mApplication.getApplicationContext().getResources();
+        // TODO related to adding notifications
+//        mAlarmMgr = (AlarmManager)mApplication.getSystemService(Context.ALARM_SERVICE);
         mPrayerTimes = new PrayerTimes();
         mUpdateViews = new MutableLiveData<>(false);
     }
@@ -51,6 +53,29 @@ public class MainViewModel extends AndroidViewModel {
     public LiveData<Boolean> getUpdateViews() {
         return mUpdateViews;
     }
+
+    // TODO related to adding notifications
+//    public void setMainDailyAlarm() {
+//        Intent intent = new Intent(mApplication, AlarmReceiver.class);
+//        mAlarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+//
+//        // Set the alarm to start at approximately 2:00 a.m.
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTimeInMillis(System.currentTimeMillis());
+//        calendar.set(Calendar.HOUR_OF_DAY, 2);
+//        // With setInexactRepeating(), you have to use one of the AlarmManager interval
+//        // constants - in this case, AlarmManager.INTERVAL_DAY.
+//        mAlarmMgr.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
+//        AlarmManager.INTERVAL_DAY, alarmIntent);
+//    }
+
+    // TODO related to adding notifications
+//    public void setDailyPrayerAlarms() {
+//    }
+
+    // TODO related to adding notifications
+//    private AlarmManager mAlarmMgr;
+//    private PendingIntent mAlarmIntent;
 
     private MutableLiveData<Boolean> mUpdateViews;
 
