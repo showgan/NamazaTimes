@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreferenceCompat
+        android:key="pref_key_dark_theme"
+        android:title="Dark theme"
+        android:summary="Toggle dark mode"
+        android:defaultValue="false" />
+
+    <ListPreference
+        android:key="pref_key_language"
+        android:title="Language options"
+        android:summary="Select which language(s) to display"
+        android:entries="@array/pref_language_entries"
+        android:entryValues="@array/pref_language_values"
+        android:defaultValue="1" />
+
+    <ListPreference
+        android:key="pref_key_widget_theme"
+        android:title="Widget theme"
+        android:summary="Widget appearance: follow system, follow app, light, or dark"
+        android:entries="@array/pref_widget_theme_entries"
+        android:entryValues="@array/pref_widget_theme_values"
+        android:defaultValue="0" />
+
+</PreferenceScreen>

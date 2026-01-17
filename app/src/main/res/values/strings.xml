@@ -1,5 +1,27 @@
 <resources>
     <string name="app_name">NamazaTimes</string>
+    <string-array name="pref_language_entries">
+        <item>Adıǵe + العربية + עברית</item>
+        <item>Adıǵe + العربية</item>
+        <item>Adıǵe</item>
+    </string-array>
+    <string-array name="pref_language_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="pref_widget_theme_entries">
+        <item>Follow system</item>
+        <item>Follow app</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <string-array name="pref_widget_theme_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

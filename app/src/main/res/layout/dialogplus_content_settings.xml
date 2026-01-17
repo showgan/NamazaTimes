@@ -1,57 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layoutDirection="ltr"
-    android:background="@color/dialogplus_background_settings">
+    android:padding="12dp"
+    android:background="@color/white">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/dialogplus_settings_content_buttonA"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginHorizontal="60dp"
-        android:layout_marginBottom="16dp"
-        android:textAllCaps="false"
+        android:text="Language options"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:paddingBottom="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:text="Adıǵe + العربية + עברית"
-        android:gravity="center"
-        android:textStyle="normal"
-        android:textSize="@dimen/dialog_text_size1"
-        android:textColor="@color/black"
-        android:background="@drawable/dialogplus_settings_background_option"
-        android:outlineProvider="background"/>
+        android:paddingVertical="8dp" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/dialogplus_settings_content_buttonB"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginHorizontal="60dp"
-        android:layout_marginBottom="16dp"
-        android:textAllCaps="false"
         android:text="Adıǵe + العربية"
-        android:gravity="center"
-        android:textStyle="normal"
-        android:textSize="@dimen/dialog_text_size1"
-        android:textColor="@color/black"
-        android:background="@drawable/dialogplus_settings_background_option"
-        android:outlineProvider="background"/>
+        android:paddingVertical="8dp" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/dialogplus_settings_content_buttonC"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginHorizontal="60dp"
-        android:layout_marginBottom="16dp"
-        android:textAllCaps="false"
         android:text="Adıǵe"
-        android:gravity="center"
-        android:textStyle="normal"
-        android:textSize="@dimen/dialog_text_size1"
-        android:textColor="@color/black"
-        android:background="@drawable/dialogplus_settings_background_option"
-        android:outlineProvider="background"/>
+        android:paddingVertical="8dp" />
+
 </LinearLayout>

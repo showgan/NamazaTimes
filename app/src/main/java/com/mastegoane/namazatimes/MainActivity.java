@@ -1,7 +1,10 @@
+
 package com.mastegoane.namazatimes;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.app.AppCompatDelegate;
+import android.widget.CompoundButton;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -10,12 +13,14 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import android.Manifest;
 import android.app.DatePickerDialog;
+import android.app.AlarmManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -27,10 +32,6 @@ import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.Toast;
 import com.mastegoane.namazatimes.databinding.ActivityMainBinding;
-import com.orhanobut.dialogplus.DialogPlus;
-import com.orhanobut.dialogplus.DialogPlusBuilder;
-import com.orhanobut.dialogplus.Holder;
-import com.orhanobut.dialogplus.ViewHolder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -39,355 +40,300 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import android.provider.Settings;
 
 public class MainActivity extends AppCompatActivity {
 
-    public void pickDateClicked(View view) {
-        new DatePickerDialog(this, mDatePickerDateSetListener,
-                mCalendar.get(Calendar.YEAR),
-                mCalendar.get(Calendar.MONTH),
-                mCalendar.get(Calendar.DAY_OF_MONTH))
-                .show();
-    }
+	public void pickDateClicked(View view) {
+		new DatePickerDialog(this, mDatePickerDateSetListener,
+				mCalendar.get(Calendar.YEAR),
+				mCalendar.get(Calendar.MONTH),
+				mCalendar.get(Calendar.DAY_OF_MONTH))
+				.show();
+	}
 
-    public void incrementDateClicked(View view) {
-        if (view.getTag().toString().equals("increment")) {
-            mCalendar.add(Calendar.DATE, 1);
-        } else {
-            mCalendar.add(Calendar.DATE, -1);
-        }
-        mMainViewModel.updateViews();
-        updateViews();
-    }
+	public void incrementDateClicked(View view) {
+		if (view.getTag() != null && view.getTag().toString().equals("increment")) {
+			mCalendar.add(Calendar.DATE, 1);
+		} else {
+			mCalendar.add(Calendar.DATE, -1);
+		}
+		try {
+			mMainViewModel.updateViews();
+		} catch (Exception ignored) {}
+		updateViews();
+	}
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mMainViewModel = new ViewModelProvider(this,
-                (ViewModelProvider.Factory) ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication()))
-                .get(MainViewModel.class);
-        mBinding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(mBinding.getRoot());
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// Apply saved theme preference before inflating views
+		mSharedPreferences = this.getSharedPreferences("namazatimes", MODE_PRIVATE);
+		int nightModePref = mSharedPreferences.getInt("pref_night_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+		AppCompatDelegate.setDefaultNightMode(nightModePref);
+		super.onCreate(savedInstanceState);
+		mMainViewModel = new ViewModelProvider(this,
+				(ViewModelProvider.Factory) ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication()))
+				.get(MainViewModel.class);
+		mBinding = ActivityMainBinding.inflate(getLayoutInflater());
+		setContentView(mBinding.getRoot());
+		final DisplayMetrics displayMetrics = getApplicationContext().getResources().getDisplayMetrics();
+		mDp2pxFactor = displayMetrics.density;
+		mCalendar = mMainViewModel.getCalendar().getValue();
 
-        final DisplayMetrics displayMetrics = getApplicationContext().getResources().getDisplayMetrics();
-        mDp2pxFactor = displayMetrics.density;
-        mSharedPreferences = this.getSharedPreferences("namazatimes", MODE_PRIVATE);
-        mCalendar = mMainViewModel.getCalendar().getValue();
+		mFragmentManager = getSupportFragmentManager();
+		mDailyTimesFragmentA = new DailyTimesFragmentA();
+		mDailyTimesFragmentB = new DailyTimesFragmentB();
+		mDailyTimesFragmentC = new DailyTimesFragmentC();
+		mCurrentFragment = mSharedPreferences.getInt("sp_current_fragment", 1);
+		if (mCurrentFragment < 1 || mCurrentFragment > 3) {
+			mCurrentFragment = 1;
+		}
+		selectFragment(mCurrentFragment);
 
-        mFragmentManager = getSupportFragmentManager();
-        mDailyTimesFragmentA = new DailyTimesFragmentA();
-        mDailyTimesFragmentB = new DailyTimesFragmentB();
-        mDailyTimesFragmentC = new DailyTimesFragmentC();
-        mCurrentFragment = mSharedPreferences.getInt("sp_current_fragment", 1);
-        if (mCurrentFragment < 1 || mCurrentFragment > 3) {
-            // BUG
-            mCurrentFragment = 1;
-        }
-        selectFragment(mCurrentFragment);
+		mBinding.bottomnavigationView.setOnNavigationItemSelectedListener(item -> {
+			int id = item.getItemId();
+			if (id == R.id.navShareToWhatsapp) {
+				shareScreenshot(false);
+				return true;
+			} else if (id == R.id.navSaveToGallery) {
+				shareScreenshot(true);
+				return true;
+			} else if (id == R.id.navSettings) {
+				// Open the SettingsActivity (settings fragment housed there)
+				try {
+					startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return true;
+			}
+			return true;
+		});
 
-        mBinding.bottomnavigationView.setOnNavigationItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.navShareToWhatsapp:
-                    shareScreenshot(false);
-                    return true;
-                case R.id.navSaveToGallery:
-                    shareScreenshot(true);
-                    return true;
-                case R.id.navSettings:
-                    showDialogPlusSettings();
-                    return true;
-            }
-            return true;
-        });
+		mDatePickerDateSetListener = new DatePickerDialog.OnDateSetListener() {
+			@Override
+			public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+				mCalendar.set(Calendar.YEAR, year);
+				mCalendar.set(Calendar.MONTH, monthOfYear);
+				mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+				mMainViewModel.updateViews();
+				updateViews();
+			}
+		};
 
-        mDatePickerDateSetListener = new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                // TODO Auto-generated method stub
-                mCalendar.set(Calendar.YEAR, year);
-                mCalendar.set(Calendar.MONTH, monthOfYear);
-                mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                mMainViewModel.updateViews();
-                updateViews();
-            }
-        };
+		mMainViewModel.readPrayerTimes();
+		updateViews();
+	}
 
-        mMainViewModel.readPrayerTimes();
-        updateViews();
+	@Override
+	protected void onResume() {
+		super.onResume();
+		try {
+			int prefFragment = mSharedPreferences.getInt("sp_current_fragment", 1);
+			if (prefFragment < 1 || prefFragment > 3) prefFragment = 1;
+			if (prefFragment != mCurrentFragment) {
+				selectFragment(prefFragment);
+			}
+		} catch (Exception ignored) {}
+		requestExactAlarmPermissionIfNeeded();
+	}
 
-        // TODO related to adding notifications
-//        createNotificationChannel();
-//        showNotification("801", "666");
-    }
+	private void selectFragment(int fragmentIndex) {
+		final FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+		switch (fragmentIndex) {
+			case 1:
+				fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentA, null);
+				break;
+			case 2:
+				fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentB, null);
+				break;
+			case 3:
+				fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentC, null);
+				break;
+			default:
+				fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentA, null);
+				break;
+		}
+		mCurrentFragment = fragmentIndex;
+		fragmentTransaction.commit();
+		try { mMainViewModel.updateViews(); } catch (Exception ignored) {}
+		updateViews();
+	}
 
-    // TODO related to adding notifications
-//    private void createNotificationChannel() {
-//        // Create the NotificationChannel, but only on API 26+ because
-//        // the NotificationChannel class is new and not in the support library
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            NotificationChannel channel = new NotificationChannel(mNotificationChannelId, "Namaza", NotificationManager.IMPORTANCE_DEFAULT);
-//            channel.setDescription("Namaza");
-//            channel.enableVibration(true);
-//            channel.setVibrationPattern(new long[]{100, 100, 100, 600, 100, 300, 100, 350});
-//            channel.setSound(null, null);
-//            // Register the channel with the system; you can't change the importance
-//            // or other notification behaviors after this
-//            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-//            notificationManager.createNotificationChannel(channel);
-//        }
-//    }
+	private void updateViews() {
+		String dateFormat = "d\nMMMM\nyyyy";
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
+		try {
+			mBinding.textViewMainDate.setText(simpleDateFormat.format(mCalendar.getTime()));
+		} catch (Exception ignored) {}
+		final int dayOfWeek = mCalendar.get(Calendar.DAY_OF_WEEK) - 1;
+		switch (mCurrentFragment) {
+			case 1:
+				try {
+					mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n" + mDayNamesHebrew[dayOfWeek] + "\n" + mDayNamesArabic[dayOfWeek]);
+				} catch (Exception ignored) {}
+				break;
+			case 2:
+				try { mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n" + mDayNamesArabic[dayOfWeek]); } catch (Exception ignored) {}
+				break;
+			case 3:
+				try { mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n"); } catch (Exception ignored) {}
+				break;
+			default:
+				try { mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n" + mDayNamesHebrew[dayOfWeek] + "\n" + mDayNamesArabic[dayOfWeek]); } catch (Exception ignored) {}
+				break;
+		}
+	}
 
-    // TODO related to adding notifications
-//    private void showNotification(String title, String content) {
-//        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, mNotificationChannelId)
-//                .setSmallIcon(R.drawable.prayer_times_icon)
-//                .setContentTitle(title)
-//                .setContentText(content)
-//                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-//                .setAutoCancel(true);
-//        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-//        // notificationId is a unique int for each notification that you must define
-//        final int notificationId = 145;
-//        notificationManager.notify(notificationId, builder.build());
-//    }
+	private void shareScreenshot(boolean shareToGallery) {
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+		}
 
-    private void showDialogPlusSettings() {
-        final boolean expanded = true;
-        final int gravity = Gravity.TOP;
-        final Holder holder = new ViewHolder(R.layout.dialogplus_content_settings);
-        final DialogPlusAdapter adapter = new DialogPlusAdapter(MainActivity.this);
-        final DialogPlusBuilder builder = DialogPlus.newDialog(this)
-                .setContentHolder(holder);
-        builder.setHeader(R.layout.dialogplus_header_settings);
-        builder.setFooter(R.layout.dialogplus_footer_settings);
-        builder.setCancelable(true)
-                .setGravity(gravity)
-                .setAdapter(adapter)
-                .setContentBackgroundResource(R.color.transparent)
-                .setOnClickListener((dialog, view) -> {
-                    final int viewId = view.getId();
-                    final AppCompatButton buttonA = findViewById(R.id.dialogplus_settings_content_buttonA);
-                    final AppCompatButton buttonB = findViewById(R.id.dialogplus_settings_content_buttonB);
-                    final AppCompatButton buttonC = findViewById(R.id.dialogplus_settings_content_buttonC);
-                    final AppCompatButton buttonSelect = findViewById(R.id.dialogplus_settings_footer_buttonSelect);
-                    if (viewId == R.id.dialogplus_settings_content_buttonB) {
-                        buttonA.setSelected(false);
-                        buttonB.setSelected(true);
-                        buttonC.setSelected(false);
-                        buttonSelect.setEnabled(true);
-                    } else if (viewId == R.id.dialogplus_settings_content_buttonC) {
-                        buttonA.setSelected(false);
-                        buttonB.setSelected(false);
-                        buttonC.setSelected(true);
-                        buttonSelect.setEnabled(true);
-                    } else if (viewId == R.id.dialogplus_settings_content_buttonA) {
-                        buttonA.setSelected(true);
-                        buttonB.setSelected(false);
-                        buttonC.setSelected(false);
-                        buttonSelect.setEnabled(true);
-                    } else if (viewId == R.id.dialogplus_settings_footer_buttonSelect) {
-                        if (buttonSelect.isEnabled()) {
-                            int selectedFragment = 1;
-                            if (buttonB.isSelected()) {
-                                selectedFragment = 2;
-                            } else if (buttonC.isSelected()) {
-                                selectedFragment = 3;
-                            }
-                            final SharedPreferences.Editor sharedPrefEditor = mSharedPreferences.edit();
-                            sharedPrefEditor.putInt("sp_current_fragment", selectedFragment);
-                            // Note: need to use commit() and not apply() below. Otherwise, the app restarts before data is written down.
-                            sharedPrefEditor.commit();
-                            selectFragment(selectedFragment);
-                            dialog.dismiss();
-                        }
-                    } else if (viewId == R.id.dialogplus_settings_footer_buttonCancel) {
-                        dialog.dismiss();
-                    }
-                })
-                .setContentHeight(ViewGroup.LayoutParams.WRAP_CONTENT)
-//                .setContentHeight((int)(800*mDp2pxFactor))
-//                .setExpanded(expanded)
-                .setExpanded(expanded, (int)(360*mDp2pxFactor))
-//                .setExpanded(expanded, 400)
-//                .setOnCancelListener(dialog -> toast("cancelled"))
-                .setOverlayBackgroundResource(android.R.color.transparent);
-        builder.create().show();
-    }
+		final ConstraintLayout view = mBinding.constraintLayoutMainFullScreen;
+		int width = view.getWidth();
+		int height = view.getHeight();
+		Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+		File outputDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+		if (!outputDir.exists()) {
+			if (!outputDir.mkdirs()) {
+				Log.e("DIRECTORY_PICTURES", "Failed to create output directory");
+				return;
+			}
+		}
+		Canvas canvas = new Canvas(bitmap);
+		view.draw(canvas);
+		final String outputFilePath = outputDir.getAbsolutePath() + File.separator + "question2share.webp";
+		Log.d("Writing file", outputFilePath);
+		String mediaPath;
+		try {
+			File outputFile = new File(outputFilePath);
+			OutputStream outputStream = new FileOutputStream(outputFile);
+			bitmap.compress(Bitmap.CompressFormat.WEBP, 100, outputStream);
+			outputStream.flush();
+			outputStream.close();
+		} catch (Exception exception) {
+			exception.printStackTrace();
+			Toast.makeText(this, "COULD NOT OPEN FILE FOR SAVING SCREENSHOT", Toast.LENGTH_SHORT).show();
+			return;
+		}
 
+		try {
+			Intent intent = getIntent();
+			intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+			intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+			intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			mediaPath = MediaStore.Images.Media.insertImage(this.getContentResolver(), outputFilePath, "IMG_" + System.currentTimeMillis(), null);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			Toast.makeText(this, "COULD NOT SAVE SCREENSHOT TO GALLERY", Toast.LENGTH_SHORT).show();
+			return;
+		}
 
-    private void selectFragment(int fragmentIndex) {
-        final FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-        switch (fragmentIndex) {
-            case 1:
-                fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentA, null);
-                break;
-            case 2:
-                fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentB, null);
-                break;
-            case 3:
-                fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentC, null);
-                break;
-            default:
-                fragmentTransaction.replace(R.id.frameLayoutMainDailyTimesFragment, mDailyTimesFragmentA, null);
-                break;
+		if (mediaPath == null || mediaPath.equals("")) {
+			Toast.makeText(this, "SOMETHING WENT WRONG WHILE TRYING TO SAVE SCREENSHOT TO GALLERY", Toast.LENGTH_SHORT).show();
+			return;
+		}
 
-        }
-        mCurrentFragment = fragmentIndex;
-        fragmentTransaction.commit();
-        mMainViewModel.updateViews();
-        updateViews();
-    }
+		if (shareToGallery) {
+			final String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+			MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "AdigaQuiz_" + timeStamp, "");
+			Toast.makeText(this, "SAVED THE IMAGE TO THE GALLERY", Toast.LENGTH_SHORT).show();
+		} else {
+			Intent intentShare = new Intent(Intent.ACTION_SEND);
+			intentShare.setType("image/*");
+			intentShare.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+			intentShare.putExtra(Intent.EXTRA_STREAM, Uri.parse(mediaPath));
+			startActivity(Intent.createChooser(intentShare, "Share Image"));
+		}
+	}
 
-    private void updateViews() {
-        String dateFormat = "d\nMMMM\nyyyy";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
-        mBinding.textViewMainDate.setText(simpleDateFormat.format(mCalendar.getTime()));
-        final int dayOfWeek = mCalendar.get(Calendar.DAY_OF_WEEK) - 1;
-        switch (mCurrentFragment) {
-            case 1:
-                mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n" + mDayNamesHebrew[dayOfWeek] + "\n" + mDayNamesArabic[dayOfWeek]);
-                break;
-            case 2:
-                mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n" + mDayNamesArabic[dayOfWeek]);
-                break;
-            case 3:
-                mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n");
-                break;
-            default:
-                mBinding.textViewMainDay.setText(mDayNamesAdiga[dayOfWeek] + "\n" + mDayNamesHebrew[dayOfWeek] + "\n" + mDayNamesArabic[dayOfWeek]);
-                break;
-        }
-    }
+	private DatePickerDialog.OnDateSetListener mDatePickerDateSetListener;
+	private Calendar mCalendar;
+	private String[] mDayNamesAdiga = new String[] {
+			"Thawmaf",
+			"Blıpe",
+			"Ğubcı",
+			"Beresḱéjiy",
+			"Mefeḱu'",
+			"Beresḱefu'",
+			"Mefezaku'"
+	};
+	private String[] mDayNamesEnglish = new String[] {
+			"Sunday",
+			"Monday",
+			"Tuesday",
+			"Wednesday",
+			"Thursday",
+			"Friday",
+			"Saturday"
+	};
+	private String[] mDayNamesTurkish = new String[] {
+			"Pazar",
+			"Pazartesi",
+			"Salı",
+			"Çarşamba",
+			"Perşembe",
+			"Cuma",
+			"Cumartesi"
+	};
+	private String[] mDayNamesArabic = new String[] {
+			"الأحد",
+			"الإثنين",
+			"الثلاثاء",
+			"الأربعاء",
+			"الخميس",
+			"الجمعة",
+			"السبت"
+	};
+	private String[] mDayNamesHebrew = new String[] {
+			"ראשון",
+			"שני",
+			"שלישי",
+			"רביעי",
+			"חמישי",
+			"שישי",
+			"שבת"
+	};
 
-    private void shareScreenshot(boolean shareToGallery) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-        }
+	private FragmentManager mFragmentManager;
+	private DailyTimesFragmentA mDailyTimesFragmentA;
+	private DailyTimesFragmentB mDailyTimesFragmentB;
+	private DailyTimesFragmentC mDailyTimesFragmentC;
 
-        final ConstraintLayout view = mBinding.constraintLayoutMainFullScreen;
-        int width = view.getWidth();
-        int height = view.getHeight();
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        File outputDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        if (!outputDir.exists()) {
-            if (!outputDir.mkdirs()) {
-                Log.e("DIRECTORY_PICTURES", "Failed to create output directory");
-                return;
-            }
-        }
-        Canvas canvas = new Canvas(bitmap);
-        view.draw(canvas);
-        final String outputFilePath = outputDir.getAbsolutePath() + File.separator + "question2share.webp";
-        Log.d("Writing file", outputFilePath);
-        String mediaPath;
-        try {
-            File outputFile = new File(outputFilePath);
-            OutputStream outputStream = new FileOutputStream(outputFile);
-            bitmap.compress(Bitmap.CompressFormat.WEBP, 100, outputStream);
-            outputStream.flush();
-            outputStream.close();
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            Toast.makeText(this, "COULD NOT OPEN FILE FOR SAVING SCREENSHOT", Toast.LENGTH_SHORT).show();
-            return;
-        }
+	private int mCurrentFragment = 1;
 
-        try {
-            Intent intent = getIntent();
-            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mediaPath = MediaStore.Images.Media.insertImage(this.getContentResolver(), outputFilePath, "IMG_" + System.currentTimeMillis(), null);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "COULD NOT SAVE SCREENSHOT TO GALLERY", Toast.LENGTH_SHORT).show();
-            return;
-        }
+	protected float mDp2pxFactor = 0;
+	private ActivityMainBinding mBinding;
+	private MainViewModel mMainViewModel;
+	private SharedPreferences mSharedPreferences = null;
 
-        if (mediaPath == null || mediaPath.equals("")) {
-            Toast.makeText(this, "SOMETHING WENT WRONG WHILE TRYING TO SAVE SCREENSHOT TO GALLERY", Toast.LENGTH_SHORT).show();
-            return;
-        }
+	private static final String TAG = MainActivity.class.getSimpleName();
 
-        if (shareToGallery) {
-            final String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "AdigaQuiz_" + timeStamp, "");
-            Toast.makeText(this, "SAVED THE IMAGE TO THE GALLERY", Toast.LENGTH_SHORT).show();
-        } else {
-            Intent intentShare = new Intent(Intent.ACTION_SEND);
-//            intentShare.setType("image/webp");
-            intentShare.setType("image/*");
-            intentShare.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//            intentShare.putExtra(Intent.EXTRA_STREAM, Uri.parse(outputFilePath));
-            intentShare.putExtra(Intent.EXTRA_STREAM, Uri.parse(mediaPath));
-//            intentShare.setPackage("com.whatsapp");
-            startActivity(Intent.createChooser(intentShare, "Share Image"));
-        }
-    }
-
-    private DatePickerDialog.OnDateSetListener mDatePickerDateSetListener;
-    private Calendar mCalendar;
-    private String[] mDayNamesAdiga = new String[] {
-            "Thawmaf",
-            "Blıpe",
-            "Ğubcı",
-            "Beresḱéjiy",
-            "Mefeḱu'",
-            "Beresḱefu'",
-            "Mefezaku'"
-    };
-    private String[] mDayNamesEnglish = new String[] {
-            "Sunday",
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday"
-    };
-    private String[] mDayNamesTurkish = new String[] {
-            "Pazar",
-            "Pazartesi",
-            "Salı",
-            "Çarşamba",
-            "Perşembe",
-            "Cuma",
-            "Cumartesi"
-    };
-    private String[] mDayNamesArabic = new String[] {
-            "الأحد",
-            "الإثنين",
-            "الثلاثاء",
-            "الأربعاء",
-            "الخميس",
-            "الجمعة",
-            "السبت"
-    };
-    private String[] mDayNamesHebrew = new String[] {
-            "ראשון",
-            "שני",
-            "שלישי",
-            "רביעי",
-            "חמישי",
-            "שישי",
-            "שבת"
-    };
-
-    private FragmentManager mFragmentManager;
-    private DailyTimesFragmentA mDailyTimesFragmentA;
-    private DailyTimesFragmentB mDailyTimesFragmentB;
-    private DailyTimesFragmentC mDailyTimesFragmentC;
-
-    private int mCurrentFragment = 1;
-
-    protected float mDp2pxFactor = 0;
-    private ActivityMainBinding mBinding;
-    private MainViewModel mMainViewModel;
-    private SharedPreferences mSharedPreferences = null;
-
-    // TODO related to adding notifications
-//    private final String mNotificationChannelId = "namaza1";
-
-    private static final String TAG = MainActivity.class.getSimpleName();
+	private void requestExactAlarmPermissionIfNeeded() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+			AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+			if (am != null && !am.canScheduleExactAlarms()) {
+				new androidx.appcompat.app.AlertDialog.Builder(this)
+						.setTitle("Allow exact alarms")
+						.setMessage("To ensure the widget updates exactly when prayer times change, please allow the app to schedule exact alarms in system settings.")
+						.setPositiveButton("Open Settings", (dialog, which) -> {
+							try {
+								Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+								intent.setData(Uri.parse("package:" + getPackageName()));
+								if (intent.resolveActivity(getPackageManager()) != null) {
+									startActivity(intent);
+								} else {
+									Toast.makeText(this, "Please allow exact alarms in system settings.", Toast.LENGTH_LONG).show();
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						})
+						.setNegativeButton("Cancel", null)
+						.show();
+			}
+		}
+	}
 }

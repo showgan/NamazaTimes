@@ -7,6 +7,4 @@
 <!--    <dimen name="margin2">70dp</dimen>-->
 <!--    <dimen name="icon_size1">24dp</dimen>-->
 
-    <dimen name="dialog_text_size1">22dp</dimen>
-    <dimen name="dialog_text_size2">25dp</dimen>
 </resources>

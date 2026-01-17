@@ -155,9 +155,9 @@ public class DailyTimesFragmentC extends Fragment {
     }
 
     private void updateTextColors(int prayerIndex) {
-        final Context applicationContext = getActivity().getApplicationContext();
-        final int colorNotSelected = ContextCompat.getColor(applicationContext, R.color.mainText);
-        final int colorSelected = ContextCompat.getColor(applicationContext, R.color.mainTextSelected);
+        final Context ctx = requireContext();
+        final int colorNotSelected = ContextCompat.getColor(ctx, R.color.mainText);
+        final int colorSelected = ContextCompat.getColor(ctx, R.color.mainTextSelected);
         mBinding.textViewMainSabahAdiga.setTextColor(colorNotSelected);
         mBinding.textViewMainSabahTime.setTextColor(colorNotSelected);
 

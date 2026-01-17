@@ -35,7 +35,7 @@
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="@font/corbel"
-                android:textColor="@color/mainText"
+                android:textColor="@color/main_text_color"
                 android:text="Sebeh"
                 android:layout_weight="1.0" />
             <TextView
@@ -45,7 +45,7 @@
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="@font/carmela"
-                android:textColor="@color/mainText"
+                android:textColor="@color/main_text_color"
                 android:text="בוקר"
                 android:layout_weight="1.0" />
             <TextView
@@ -55,7 +55,7 @@
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="sans-serif-thin"
-                android:textColor="@color/mainText"
+                android:textColor="@color/main_text_color"
                 android:text="فجر"
                 android:layout_weight="1.0" />
             <TextView
@@ -65,12 +65,12 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_time"
-                android:shadowColor="#50000000"
+                android:shadowColor="@color/text_shadow"
                 android:shadowDx="5"
                 android:shadowDy="5"
                 android:shadowRadius="9"
                 android:fontFamily="@font/gisha"
-                android:textColor="@color/mainText"
+                android:textColor="@color/main_text_color"
                 android:text="5:07"
                 android:layout_weight="1.0" />
         </LinearLayout>
@@ -92,7 +92,7 @@
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="@font/corbel"
-                android:textColor="@color/mainTextSelected"
+                android:textColor="@color/mainText"
                 android:text="Tığe Kıćeqığö"
                 android:layout_weight="1.0" />
             <TextView
@@ -102,7 +102,7 @@
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="@font/carmela"
-                android:textColor="@color/mainTextSelected"
+                android:textColor="@color/mainText"
                 android:text="זריחה"
                 android:layout_weight="1.0" />
             <TextView
@@ -112,7 +112,7 @@
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_name"
                 android:fontFamily="sans-serif-thin"
-                android:textColor="@color/mainTextSelected"
+                android:textColor="@color/mainText"
                 android:text="شروق"
                 android:layout_weight="1.0" />
             <TextView
@@ -122,12 +122,12 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_time"
-                android:shadowColor="#50000000"
+                android:shadowColor="@color/text_shadow"
                 android:shadowDx="5"
                 android:shadowDy="5"
                 android:shadowRadius="9"
                 android:fontFamily="@font/gisha"
-                android:textColor="@color/mainTextSelected"
+                android:textColor="@color/mainText"
                 android:text="6:24"
                 android:layout_weight="1.0" />
         </LinearLayout>
@@ -179,7 +179,7 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_time"
-                android:shadowColor="#50000000"
+                android:shadowColor="@color/text_shadow"
                 android:shadowDx="5"
                 android:shadowDy="5"
                 android:shadowRadius="9"
@@ -236,7 +236,7 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_time"
-                android:shadowColor="#50000000"
+                android:shadowColor="@color/text_shadow"
                 android:shadowDx="5"
                 android:shadowDy="5"
                 android:shadowRadius="9"
@@ -293,7 +293,7 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_time"
-                android:shadowColor="#50000000"
+                android:shadowColor="@color/text_shadow"
                 android:shadowDx="5"
                 android:shadowDy="5"
                 android:shadowRadius="9"
@@ -349,7 +349,7 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="center_horizontal|center_vertical"
                 android:textSize="@dimen/main_prayer_time"
-                android:shadowColor="#50000000"
+                android:shadowColor="@color/text_shadow"
                 android:shadowDx="5"
                 android:shadowDy="5"
                 android:shadowRadius="9"
@@ -360,14 +360,14 @@
         </LinearLayout>
     </LinearLayout>
 
-    <LinearLayout
+        <LinearLayout
         android:id="@+id/linearLayoutMainAqsa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layoutDirection="ltr"
         android:paddingVertical="8dp"
-        android:background="#F5F5F5"
+        android:background="?attr/colorBackground"
         app:layout_constraintBottom_toBottomOf="parent">
         <TextView
             android:layout_width="wrap_content"
@@ -375,7 +375,7 @@
             android:layout_weight="1"
             android:gravity="center_horizontal|center_vertical"
             android:textSize="@dimen/sub_title"
-            android:textColor="@color/mainText"
+            android:textColor="@color/main_text_color"
             android:text="Akše Camiye Waḣtex"/>
         <TextView
             android:layout_width="wrap_content"
@@ -383,7 +383,7 @@
             android:layout_weight="1"
             android:gravity="center_horizontal|center_vertical"
             android:textSize="@dimen/sub_title"
-            android:textColor="@color/mainText"
+            android:textColor="@color/main_text_color"
             android:text="זמני מסגד אל-אקסא"/>
         <TextView
             android:layout_width="wrap_content"
@@ -391,7 +391,7 @@
             android:layout_weight="1"
             android:gravity="center_horizontal|center_vertical"
             android:textSize="@dimen/sub_title"
-            android:textColor="@color/mainText"
+            android:textColor="@color/main_text_color"
             android:text="مواقيت المسجد الأقصى"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

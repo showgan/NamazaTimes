@@ -20,7 +20,8 @@ public class PrayerTimes {
     public PrayerTimes() {
         mTimeTable = new ArrayMap<>();
         mCalendarLD = new MutableLiveData<>(Calendar.getInstance());
-        mDateFormat = new SimpleDateFormat("dd,mm");
+        // Use day and month (no minutes). 'M' is month; use non-padded pattern to match keys like "1,1".
+        mDateFormat = new SimpleDateFormat("d,M");
         mDaylightTime = mCalendarLD.getValue().getTimeZone().inDaylightTime(mCalendarLD.getValue().getTime());
     }
 
@@ -320,6 +321,72 @@ public class PrayerTimes {
         private String mAsr;
         private String mMagrib;
         private String mIsha;
+    }
+
+    public static class NextPrayer {
+        private final String name;
+        private final String time;
+
+        public NextPrayer(String name, String time) {
+            this.name = name;
+            this.time = time;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getTime() {
+            return time;
+        }
+    }
+
+    /**
+     * Returns the next prayer (name and time). If no later prayer today is found,
+     * returns fajr time of the next day when available.
+     */
+    public NextPrayer getNextPrayer() {
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+        final Date currentTime = mCalendarLD.getValue().getTime();
+        final Calendar temporaryCalendar = Calendar.getInstance();
+        temporaryCalendar.setTime(currentTime);
+        final int currentTimeInMinutes = temporaryCalendar.get(Calendar.HOUR_OF_DAY) * 60 + temporaryCalendar.get(Calendar.MINUTE);
+
+        final DailyTimes todays = getTodaysTimes();
+        if (todays == null) {
+            return null;
+        }
+
+        final String[] names = new String[]{"fajr", "shurooq", "duhr", "asr", "magrib", "isha"};
+        try {
+            for (String name : names) {
+                String timeStr = todays.getTimeOf(name, false);
+                if (timeStr == null) continue;
+                Date t = simpleDateFormat.parse(timeStr);
+                if (t == null) continue;
+                temporaryCalendar.setTime(t);
+                int tMin = temporaryCalendar.get(Calendar.HOUR_OF_DAY) * 60 + temporaryCalendar.get(Calendar.MINUTE);
+                if (tMin > currentTimeInMinutes) {
+                    return new NextPrayer(name, timeStr);
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        // No later prayer today - return fajr of next day if available
+        final Calendar nextDayCal = (Calendar) mCalendarLD.getValue().clone();
+        nextDayCal.add(Calendar.DAY_OF_MONTH, 1);
+        final int day = nextDayCal.get(Calendar.DAY_OF_MONTH);
+        final int month = nextDayCal.get(Calendar.MONTH) + 1;
+        final String key = day + "," + month;
+        final DailyTimes nextDayTimes = mTimeTable.get(key);
+        if (nextDayTimes != null) {
+            return new NextPrayer("fajr", nextDayTimes.getTimeOf("fajr", false));
+        }
+
+        // Fallback - return fajr of today
+        return new NextPrayer("fajr", todays.getTimeOf("fajr", false));
     }
 
     private InputStream mInputStream;

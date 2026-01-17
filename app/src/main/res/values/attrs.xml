@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Custom theme attributes used by themes.xml -->
+    <attr name="colorBackground" format="color" />
+    <attr name="colorOnBackground" format="color" />
+</resources>

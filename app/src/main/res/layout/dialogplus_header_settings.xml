@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:layoutDirection="ltr"
-    android:background="@color/dialogplus_background_settings">
+    android:background="@color/white">
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingVertical="16dp"
-        android:text="Please Select Languages"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:text="Select languages"
         android:gravity="center"
-        android:textStyle="normal"
-        android:textSize="@dimen/dialog_text_size2"
-        android:textColor="@color/black"/>
-</LinearLayout>
+        android:textSize="16sp"
+        android:textColor="@color/black" />
+
+</FrameLayout>
