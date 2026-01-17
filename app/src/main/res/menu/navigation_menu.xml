@@ -17,9 +17,16 @@
         android:icon="@drawable/ic_baseline_add_to_photos_24"/>
 
     <item
+        android:id="@+id/navCalendar"
+        android:title="Calendar"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="3"
+        android:icon="@drawable/ic_baseline_calendar_today_24"/>
+
+    <item
         android:id="@+id/navSettings"
         android:title="Settings"
         app:showAsAction="ifRoom"
-        android:orderInCategory="3"
+        android:orderInCategory="4"
         android:icon="@drawable/ic_outline_settings_24"/>
 </menu>

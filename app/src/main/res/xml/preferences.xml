@@ -23,4 +23,9 @@
         android:entryValues="@array/pref_widget_theme_values"
         android:defaultValue="0" />
 
+    <Preference
+        android:key="pref_key_notifications"
+        android:title="Notification settings"
+        android:summary="Manage notification permission and system notification settings" />
+
 </PreferenceScreen>

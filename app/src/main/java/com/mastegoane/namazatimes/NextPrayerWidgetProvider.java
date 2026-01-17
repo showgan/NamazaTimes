@@ -57,11 +57,17 @@ public class NextPrayerWidgetProvider extends AppWidgetProvider {
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
         if (intent != null && ACTION_UPDATE_WIDGET.equals(intent.getAction())) {
+            // If this intent carries scheduled prayer info, show notification for that scheduled
+            // prayer first (so it displays the scheduled time), then update widget/state.
+            if (intent.hasExtra("scheduled_prayer_time")) {
+                String scheduledName = intent.getStringExtra("scheduled_prayer_name");
+                String scheduledTime = intent.getStringExtra("scheduled_prayer_time");
+                showPrayerNotification(context, scheduledName, scheduledTime);
+            }
+
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             int[] ids = appWidgetManager.getAppWidgetIds(new ComponentName(context, NextPrayerWidgetProvider.class));
             onUpdate(context, appWidgetManager, ids);
-            // show notification for the prayer time; replaces previous notification (same ID)
-            showPrayerNotification(context);
         }
     }
 
@@ -185,6 +191,11 @@ public class NextPrayerWidgetProvider extends AppWidgetProvider {
             AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Intent intent = new Intent(context, NextPrayerWidgetProvider.class);
             intent.setAction(ACTION_UPDATE_WIDGET);
+            // Carry the scheduled prayer name/time in the alarm intent so the receiver can
+            // display the exact prayer that triggered the alarm (instead of recalculating
+            // next prayer which may already have advanced).
+            intent.putExtra("scheduled_prayer_name", np.getName());
+            intent.putExtra("scheduled_prayer_time", np.getTime());
             PendingIntent pi = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             if (am != null) {
                 // Check if app is allowed to schedule exact alarms. If not, fall back to periodic inexact updates.
@@ -207,6 +218,35 @@ public class NextPrayerWidgetProvider extends AppWidgetProvider {
                 }
             }
         } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Show notification using provided scheduled prayer name/time (used when alarm intent carries
+    // the scheduled values so the notification reflects the exact scheduled prayer that fired).
+    private void showPrayerNotification(Context context, String name, String time) {
+        try {
+            if (name == null || time == null) return;
+            String displayName = toAdigaPrayerName(name);
+
+            ensureNotificationChannel(context);
+
+            Intent launch = new Intent(context, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, launch, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+            Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_outline_settings_24)
+                    .setContentTitle(displayName)
+                    .setContentText("Prayer at " + time)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setSound(soundUri)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent);
+
+            NotificationManagerCompat.from(context).notify(NOTIF_ID, builder.build());
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

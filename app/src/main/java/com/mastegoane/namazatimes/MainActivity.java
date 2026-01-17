@@ -19,6 +19,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Bundle;
@@ -98,6 +100,12 @@ public class MainActivity extends AppCompatActivity {
 			} else if (id == R.id.navSaveToGallery) {
 				shareScreenshot(true);
 				return true;
+			} else if (id == R.id.navCalendar) {
+				// Open the date picker when calendar nav item is tapped
+				try {
+					pickDateClicked(mBinding.textViewMainDate);
+				} catch (Exception e) { e.printStackTrace(); }
+				return true;
 			} else if (id == R.id.navSettings) {
 				// Open the SettingsActivity (settings fragment housed there)
 				try {
@@ -135,7 +143,69 @@ public class MainActivity extends AppCompatActivity {
 				selectFragment(prefFragment);
 			}
 		} catch (Exception ignored) {}
-		requestExactAlarmPermissionIfNeeded();
+		// First, ensure we don't show both permission prompts at the same time.
+		boolean notifRequested = requestNotificationPermissionIfNeeded();
+		if (notifRequested) {
+			// we'll request exact-alarm after notification permission result
+			return;
+		}
+		// If we just returned from the exact-alarm settings flow, give the system
+		// a moment to update and then check the status instead of immediately
+		// re-showing the dialog.
+		if (mPendingExactAlarmRequest) {
+			new Handler(Looper.getMainLooper()).postDelayed(() -> {
+				mPendingExactAlarmRequest = false;
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+					AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+					if (am != null && am.canScheduleExactAlarms()) {
+						Toast.makeText(this, "Exact alarms allowed", Toast.LENGTH_SHORT).show();
+					} else {
+						Toast.makeText(this, "Exact alarms not enabled", Toast.LENGTH_LONG).show();
+					}
+				}
+			}, 800);
+		} else {
+			requestExactAlarmPermissionIfNeeded();
+		}
+	}
+	private boolean requestNotificationPermissionIfNeeded() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+				ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_POST_NOTIFICATIONS);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+		if (requestCode == REQ_POST_NOTIFICATIONS) {
+			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+				// notification permission granted
+			} else {
+				// notification permission denied
+			}
+			// After notification permission flow completes, proceed with exact-alarm flow.
+			requestExactAlarmPermissionIfNeeded();
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == REQ_SCHEDULE_EXACT_ALARM) {
+			mPendingExactAlarmRequest = false;
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+				if (am != null && am.canScheduleExactAlarms()) {
+					Toast.makeText(this, "Exact alarms allowed", Toast.LENGTH_SHORT).show();
+				} else {
+					Toast.makeText(this, "Exact alarms not enabled", Toast.LENGTH_LONG).show();
+				}
+			}
+		}
 	}
 
 	private void selectFragment(int fragmentIndex) {
@@ -311,6 +381,10 @@ public class MainActivity extends AppCompatActivity {
 
 	private static final String TAG = MainActivity.class.getSimpleName();
 
+	private static final int REQ_POST_NOTIFICATIONS = 2;
+	private static final int REQ_SCHEDULE_EXACT_ALARM = 3;
+	private boolean mPendingExactAlarmRequest = false;
+
 	private void requestExactAlarmPermissionIfNeeded() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 			AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -323,6 +397,7 @@ public class MainActivity extends AppCompatActivity {
 								Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
 								intent.setData(Uri.parse("package:" + getPackageName()));
 								if (intent.resolveActivity(getPackageManager()) != null) {
+									mPendingExactAlarmRequest = true;
 									startActivity(intent);
 								} else {
 									Toast.makeText(this, "Please allow exact alarms in system settings.", Toast.LENGTH_LONG).show();
