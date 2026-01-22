@@ -99,13 +99,8 @@ public class PrayerTimes {
 
     public void readPrayerTimes(InputStream inputStream) {
         List<String[]> tokenizedLines = new ArrayList<>();
-        loadTable(inputStream, tokenizedLines, " ");
-        try {
-            //TODO replace with thread sync using Message
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Load synchronously to avoid race conditions
+        loadTableSync(inputStream, tokenizedLines, " ");
 
         // File Format:
         //# Isha  Magrib Asr   Duhr  Shurooq Fajr  Day      Month
@@ -155,6 +150,21 @@ public class PrayerTimes {
                 }
             }
         }).start();
+    }
+
+    /**
+     * Synchronous version of loadTable to avoid race conditions.
+     * This ensures data is fully loaded before returning.
+     */
+    public void loadTableSync(InputStream inputStream, List<String[]> tokenizedLines, String delimiterExpression) {
+        mInputStream = inputStream;
+        mDelimiterExpression = delimiterExpression;
+        mTokenizedLines = tokenizedLines;
+        try {
+            load();
+        } catch (IOException e) {
+            Log.e(TAG, "Error loading prayer times", e);
+        }
     }
 
     private void load() throws IOException {

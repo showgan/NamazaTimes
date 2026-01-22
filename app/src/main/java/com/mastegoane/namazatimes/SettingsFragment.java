@@ -34,7 +34,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         ListPreference widgetPref = findPreference("pref_key_widget_theme");
         if (widgetPref != null) {
             int val = getContext().getSharedPreferences("namazatimes", Context.MODE_PRIVATE)
-                    .getInt("pref_widget_theme", 0);
+                    .getInt("pref_widget_theme", 1);
             widgetPref.setValue(String.valueOf(val));
         }
 

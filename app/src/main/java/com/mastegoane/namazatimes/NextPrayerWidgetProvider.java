@@ -24,6 +24,9 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 
 public class NextPrayerWidgetProvider extends AppWidgetProvider {
     public static final String ACTION_UPDATE_WIDGET = "com.mastegoane.namazatimes.ACTION_UPDATE_WIDGET";
@@ -76,7 +79,7 @@ public class NextPrayerWidgetProvider extends AppWidgetProvider {
 
         // Determine widget theme mode (0=follow system,1=follow app,2=light,3=dark)
         SharedPreferences sp = context.getSharedPreferences("namazatimes", Context.MODE_PRIVATE);
-        int widgetPref = sp.getInt("pref_widget_theme", 0);
+        int widgetPref = sp.getInt("pref_widget_theme", 1);
         boolean isDark = false;
         if (widgetPref == 0) {
             int uiMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
@@ -227,6 +230,8 @@ public class NextPrayerWidgetProvider extends AppWidgetProvider {
     private void showPrayerNotification(Context context, String name, String time) {
         try {
             if (name == null || time == null) return;
+            // Skip notification for shurooq (Tığe Kıćeqığö) - the second prayer time
+            if ("shurooq".equalsIgnoreCase(name)) return;
             String displayName = toAdigaPrayerName(name);
 
             ensureNotificationChannel(context);
@@ -245,6 +250,14 @@ public class NextPrayerWidgetProvider extends AppWidgetProvider {
                     .setAutoCancel(true)
                     .setContentIntent(pendingIntent);
 
+            // Check notification permission on Android 13+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) 
+                        != PackageManager.PERMISSION_GRANTED) {
+                    // Permission not granted, skip notification
+                    return;
+                }
+            }
             NotificationManagerCompat.from(context).notify(NOTIF_ID, builder.build());
         } catch (Exception e) {
             e.printStackTrace();
@@ -283,6 +296,8 @@ public class NextPrayerWidgetProvider extends AppWidgetProvider {
             pt.readPrayerTimes(is);
             PrayerTimes.NextPrayer np = pt.getNextPrayer();
             if (np == null) return;
+            // Skip notification for shurooq (Tığe Kıćeqığö) - the second prayer time
+            if ("shurooq".equalsIgnoreCase(np.getName())) return;
             String name = toAdigaPrayerName(np.getName());
             String time = np.getTime();
 
@@ -302,6 +317,14 @@ public class NextPrayerWidgetProvider extends AppWidgetProvider {
                     .setAutoCancel(true)
                     .setContentIntent(pendingIntent);
 
+            // Check notification permission on Android 13+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    // Permission not granted, skip notification
+                    return;
+                }
+            }
             NotificationManagerCompat.from(context).notify(NOTIF_ID, builder.build());
         } catch (Exception e) {
             e.printStackTrace();

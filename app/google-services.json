@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "368942074153",
+    "project_id": "namaza-times",
+    "storage_bucket": "namaza-times.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:368942074153:android:270fdc3f8e1afb6a73cf38",
+        "android_client_info": {
+          "package_name": "com.mastegoane.namazatimes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA73SINAvg9d4LeaB2h_g8zOhQhz5Lpeo0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

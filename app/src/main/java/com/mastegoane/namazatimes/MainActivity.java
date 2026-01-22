@@ -26,6 +26,7 @@ import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.content.ContentValues;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -152,9 +153,13 @@ public class MainActivity extends AppCompatActivity {
 		// If we just returned from the exact-alarm settings flow, give the system
 		// a moment to update and then check the status instead of immediately
 		// re-showing the dialog.
-		if (mPendingExactAlarmRequest) {
+		boolean pendingExactAlarm = mSharedPreferences.getBoolean(KEY_PENDING_EXACT_ALARM_REQUEST, false);
+		if (pendingExactAlarm) {
+			// Clear the flag immediately to prevent re-triggering
+			mSharedPreferences.edit().putBoolean(KEY_PENDING_EXACT_ALARM_REQUEST, false).apply();
+			// Dismiss the dialog if it's still showing
+			dismissExactAlarmDialogIfShowing();
 			new Handler(Looper.getMainLooper()).postDelayed(() -> {
-				mPendingExactAlarmRequest = false;
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 					AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 					if (am != null && am.canScheduleExactAlarms()) {
@@ -196,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == REQ_SCHEDULE_EXACT_ALARM) {
-			mPendingExactAlarmRequest = false;
+			mSharedPreferences.edit().putBoolean(KEY_PENDING_EXACT_ALARM_REQUEST, false).apply();
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 				AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 				if (am != null && am.canScheduleExactAlarms()) {
@@ -279,7 +284,12 @@ public class MainActivity extends AppCompatActivity {
 		try {
 			File outputFile = new File(outputFilePath);
 			OutputStream outputStream = new FileOutputStream(outputFile);
-			bitmap.compress(Bitmap.CompressFormat.WEBP, 100, outputStream);
+			// Use WEBP_LOSSY on Android R+ to avoid deprecation
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+				bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 100, outputStream);
+			} else {
+				bitmap.compress(Bitmap.CompressFormat.WEBP, 100, outputStream);
+			}
 			outputStream.flush();
 			outputStream.close();
 		} catch (Exception exception) {
@@ -294,8 +304,27 @@ public class MainActivity extends AppCompatActivity {
 			intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 			intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			mediaPath = MediaStore.Images.Media.insertImage(this.getContentResolver(), outputFilePath, "IMG_" + System.currentTimeMillis(), null);
-		} catch (FileNotFoundException e) {
+			// Use modern MediaStore API on Android Q+ to avoid deprecated insertImage
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+				ContentValues values = new ContentValues();
+				values.put(MediaStore.Images.Media.DISPLAY_NAME, "IMG_" + System.currentTimeMillis() + ".webp");
+				values.put(MediaStore.Images.Media.MIME_TYPE, "image/webp");
+				values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+				Uri imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+				if (imageUri != null) {
+					try (OutputStream os = getContentResolver().openOutputStream(imageUri)) {
+						if (os != null) {
+							bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 100, os);
+						}
+					}
+					mediaPath = imageUri.toString();
+				} else {
+					mediaPath = null;
+				}
+			} else {
+				mediaPath = MediaStore.Images.Media.insertImage(this.getContentResolver(), outputFilePath, "IMG_" + System.currentTimeMillis(), null);
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
 			Toast.makeText(this, "COULD NOT SAVE SCREENSHOT TO GALLERY", Toast.LENGTH_SHORT).show();
 			return;
@@ -308,7 +337,27 @@ public class MainActivity extends AppCompatActivity {
 
 		if (shareToGallery) {
 			final String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-			MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "AdigaQuiz_" + timeStamp, "");
+			// Use modern MediaStore API on Android Q+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+				try {
+					ContentValues values = new ContentValues();
+					values.put(MediaStore.Images.Media.DISPLAY_NAME, "AdigaQuiz_" + timeStamp + ".webp");
+					values.put(MediaStore.Images.Media.MIME_TYPE, "image/webp");
+					values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+					Uri imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+					if (imageUri != null) {
+						try (OutputStream os = getContentResolver().openOutputStream(imageUri)) {
+							if (os != null) {
+								bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 100, os);
+							}
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else {
+				MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "AdigaQuiz_" + timeStamp, "");
+			}
 			Toast.makeText(this, "SAVED THE IMAGE TO THE GALLERY", Toast.LENGTH_SHORT).show();
 		} else {
 			Intent intentShare = new Intent(Intent.ACTION_SEND);
@@ -383,13 +432,18 @@ public class MainActivity extends AppCompatActivity {
 
 	private static final int REQ_POST_NOTIFICATIONS = 2;
 	private static final int REQ_SCHEDULE_EXACT_ALARM = 3;
-	private boolean mPendingExactAlarmRequest = false;
+	private static final String KEY_PENDING_EXACT_ALARM_REQUEST = "pending_exact_alarm_request";
+	private androidx.appcompat.app.AlertDialog mExactAlarmDialog = null;
 
 	private void requestExactAlarmPermissionIfNeeded() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 			AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 			if (am != null && !am.canScheduleExactAlarms()) {
-				new androidx.appcompat.app.AlertDialog.Builder(this)
+				// Don't show if dialog is already showing
+				if (mExactAlarmDialog != null && mExactAlarmDialog.isShowing()) {
+					return;
+				}
+				mExactAlarmDialog = new androidx.appcompat.app.AlertDialog.Builder(this)
 						.setTitle("Allow exact alarms")
 						.setMessage("To ensure the widget updates exactly when prayer times change, please allow the app to schedule exact alarms in system settings.")
 						.setPositiveButton("Open Settings", (dialog, which) -> {
@@ -397,7 +451,7 @@ public class MainActivity extends AppCompatActivity {
 								Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
 								intent.setData(Uri.parse("package:" + getPackageName()));
 								if (intent.resolveActivity(getPackageManager()) != null) {
-									mPendingExactAlarmRequest = true;
+									mSharedPreferences.edit().putBoolean(KEY_PENDING_EXACT_ALARM_REQUEST, true).apply();
 									startActivity(intent);
 								} else {
 									Toast.makeText(this, "Please allow exact alarms in system settings.", Toast.LENGTH_LONG).show();
@@ -407,8 +461,16 @@ public class MainActivity extends AppCompatActivity {
 							}
 						})
 						.setNegativeButton("Cancel", null)
-						.show();
+						.create();
+				mExactAlarmDialog.show();
 			}
+		}
+	}
+
+	private void dismissExactAlarmDialogIfShowing() {
+		if (mExactAlarmDialog != null && mExactAlarmDialog.isShowing()) {
+			mExactAlarmDialog.dismiss();
+			mExactAlarmDialog = null;
 		}
 	}
 }

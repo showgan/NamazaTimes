@@ -21,7 +21,7 @@
         android:summary="Widget appearance: follow system, follow app, light, or dark"
         android:entries="@array/pref_widget_theme_entries"
         android:entryValues="@array/pref_widget_theme_values"
-        android:defaultValue="0" />
+        android:defaultValue="1" />
 
     <Preference
         android:key="pref_key_notifications"
