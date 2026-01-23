@@ -28,4 +28,9 @@
         android:title="Notification settings"
         android:summary="Manage notification permission and system notification settings" />
 
+    <Preference
+        android:key="pref_key_exact_alarm"
+        android:title="Exact alarm permission"
+        android:summary="Allow exact alarms for precise widget updates" />
+
 </PreferenceScreen>

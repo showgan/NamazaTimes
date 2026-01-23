@@ -17,6 +17,7 @@ import android.provider.Settings;
 import androidx.core.content.ContextCompat;
 import androidx.core.app.NotificationManagerCompat;
 import android.widget.Toast;
+import android.app.AlarmManager;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -72,6 +73,37 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
                 return true;
             });
         }
+
+        // Exact alarm permission preference
+        Preference exactAlarmPref = findPreference("pref_key_exact_alarm");
+        if (exactAlarmPref != null) {
+            exactAlarmPref.setOnPreferenceClickListener(preference -> {
+                Context ctx = getContext();
+                if (ctx == null) return true;
+
+                // On Android 12+ (API 31+), open exact alarm settings
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    try {
+                        Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                        intent.setData(Uri.parse("package:" + ctx.getPackageName()));
+                        if (intent.resolveActivity(ctx.getPackageManager()) != null) {
+                            startActivity(intent);
+                        } else {
+                            // Fallback to app details settings
+                            Intent fallbackIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            fallbackIntent.setData(Uri.parse("package:" + ctx.getPackageName()));
+                            startActivity(fallbackIntent);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(ctx, "Could not open exact alarm settings", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(ctx, "Exact alarms are automatically allowed on this Android version", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            });
+        }
     }
 
     @Override
@@ -84,6 +116,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     public void onStart() {
         super.onStart();
         updateNotificationPreferenceSummary();
+        updateExactAlarmPreferenceSummary();
     }
 
     @Override
@@ -130,6 +163,23 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
                 }
             }
             notifPref.setSummary("Notifications are blocked — tap to open system notification settings.");
+        }
+    }
+
+    private void updateExactAlarmPreferenceSummary() {
+        Preference exactAlarmPref = findPreference("pref_key_exact_alarm");
+        Context ctx = getContext();
+        if (exactAlarmPref == null || ctx == null) return;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+            if (am != null && am.canScheduleExactAlarms()) {
+                exactAlarmPref.setSummary("Exact alarms are allowed. Tap to open settings.");
+            } else {
+                exactAlarmPref.setSummary("Exact alarms not allowed — tap to enable for precise widget updates.");
+            }
+        } else {
+            exactAlarmPref.setSummary("Exact alarms are automatically allowed on this Android version.");
         }
     }
 

@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		mIsResumed = true;
 		try {
 			int prefFragment = mSharedPreferences.getInt("sp_current_fragment", 1);
 			if (prefFragment < 1 || prefFragment > 3) prefFragment = 1;
@@ -159,7 +160,16 @@ public class MainActivity extends AppCompatActivity {
 			mSharedPreferences.edit().putBoolean(KEY_PENDING_EXACT_ALARM_REQUEST, false).apply();
 			// Dismiss the dialog if it's still showing
 			dismissExactAlarmDialogIfShowing();
-			new Handler(Looper.getMainLooper()).postDelayed(() -> {
+			// Cancel any pending runnable before posting a new one
+			cancelPendingExactAlarmRunnable();
+			if (mHandler == null) {
+				mHandler = new Handler(Looper.getMainLooper());
+			}
+			mPendingExactAlarmRunnable = () -> {
+				// Check activity state before showing toast
+				if (!isActivityValid()) {
+					return;
+				}
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 					AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 					if (am != null && am.canScheduleExactAlarms()) {
@@ -168,14 +178,40 @@ public class MainActivity extends AppCompatActivity {
 						Toast.makeText(this, "Exact alarms not enabled", Toast.LENGTH_LONG).show();
 					}
 				}
-			}, 800);
+			};
+			mHandler.postDelayed(mPendingExactAlarmRunnable, 800);
 		} else {
-			requestExactAlarmPermissionIfNeeded();
+			// Check if we already showed the dialog in this session
+			boolean alreadyShown = mSharedPreferences.getBoolean(KEY_EXACT_ALARM_DIALOG_SHOWN, false);
+			if (!alreadyShown) {
+				requestExactAlarmPermissionIfNeeded();
+			}
 		}
+	}
+
+	@Override
+	protected void onPause() {
+		mIsResumed = false;
+		// Dismiss dialog when activity is paused to prevent window leak
+		dismissExactAlarmDialogIfShowing();
+		// Cancel any pending runnables
+		cancelPendingExactAlarmRunnable();
+		super.onPause();
 	}
 	private boolean requestNotificationPermissionIfNeeded() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			// Don't request if already in progress or already requested this session
+			if (mNotificationPermissionInProgress) {
+				return true; // Return true to indicate permission flow is active
+			}
+			// Check if we already requested (and user responded) in this app install
+			boolean alreadyRequested = mSharedPreferences.getBoolean(KEY_NOTIFICATION_PERMISSION_REQUESTED, false);
+			if (alreadyRequested) {
+				return false; // Don't request again
+			}
 			if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+				mNotificationPermissionInProgress = true;
+				mSharedPreferences.edit().putBoolean(KEY_NOTIFICATION_PERMISSION_REQUESTED, true).apply();
 				ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_POST_NOTIFICATIONS);
 				return true;
 			}
@@ -187,13 +223,29 @@ public class MainActivity extends AppCompatActivity {
 	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 		if (requestCode == REQ_POST_NOTIFICATIONS) {
-			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-				// notification permission granted
+			// Clear the in-progress flag
+			mNotificationPermissionInProgress = false;
+			boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+			if (granted) {
+				// notification permission granted - proceed with exact alarm flow
+				// But only if activity is still in a valid state
+				if (isActivityValid()) {
+					// Post with a small delay to allow activity state to settle
+					if (mHandler == null) {
+						mHandler = new Handler(Looper.getMainLooper());
+					}
+					mHandler.postDelayed(() -> {
+						if (isActivityValid()) {
+							requestExactAlarmPermissionIfNeeded();
+						}
+					}, 500);
+				}
 			} else {
-				// notification permission denied
+				// notification permission denied - don't show exact alarm dialog
+				// to avoid annoying the user with multiple permission dialogs
+				// Mark as shown so we don't ask again in onResume
+				mSharedPreferences.edit().putBoolean(KEY_EXACT_ALARM_DIALOG_SHOWN, true).apply();
 			}
-			// After notification permission flow completes, proceed with exact-alarm flow.
-			requestExactAlarmPermissionIfNeeded();
 		}
 	}
 
@@ -433,44 +485,88 @@ public class MainActivity extends AppCompatActivity {
 	private static final int REQ_POST_NOTIFICATIONS = 2;
 	private static final int REQ_SCHEDULE_EXACT_ALARM = 3;
 	private static final String KEY_PENDING_EXACT_ALARM_REQUEST = "pending_exact_alarm_request";
+	private static final String KEY_EXACT_ALARM_DIALOG_SHOWN = "exact_alarm_dialog_shown";
+	private static final String KEY_NOTIFICATION_PERMISSION_REQUESTED = "notification_permission_requested";
 	private androidx.appcompat.app.AlertDialog mExactAlarmDialog = null;
+	private Handler mHandler = null;
+	private Runnable mPendingExactAlarmRunnable = null;
+	private boolean mIsResumed = false;
+	private boolean mNotificationPermissionInProgress = false;
 
 	private void requestExactAlarmPermissionIfNeeded() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 			AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 			if (am != null && !am.canScheduleExactAlarms()) {
+				// Don't show if activity is not in valid state
+				if (!isActivityValid()) {
+					return;
+				}
 				// Don't show if dialog is already showing
 				if (mExactAlarmDialog != null && mExactAlarmDialog.isShowing()) {
 					return;
 				}
-				mExactAlarmDialog = new androidx.appcompat.app.AlertDialog.Builder(this)
-						.setTitle("Allow exact alarms")
-						.setMessage("To ensure the widget updates exactly when prayer times change, please allow the app to schedule exact alarms in system settings.")
-						.setPositiveButton("Open Settings", (dialog, which) -> {
-							try {
-								Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-								intent.setData(Uri.parse("package:" + getPackageName()));
-								if (intent.resolveActivity(getPackageManager()) != null) {
-									mSharedPreferences.edit().putBoolean(KEY_PENDING_EXACT_ALARM_REQUEST, true).apply();
-									startActivity(intent);
-								} else {
-									Toast.makeText(this, "Please allow exact alarms in system settings.", Toast.LENGTH_LONG).show();
+				// Mark as shown so we don't repeatedly show on each onResume
+				mSharedPreferences.edit().putBoolean(KEY_EXACT_ALARM_DIALOG_SHOWN, true).apply();
+				try {
+					mExactAlarmDialog = new androidx.appcompat.app.AlertDialog.Builder(this)
+							.setTitle("Allow exact alarms")
+							.setMessage("To ensure the widget updates exactly when prayer times change, please allow the app to schedule exact alarms in system settings.")
+							.setPositiveButton("Open Settings", (dialog, which) -> {
+								try {
+									Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+									intent.setData(Uri.parse("package:" + getPackageName()));
+									if (intent.resolveActivity(getPackageManager()) != null) {
+										mSharedPreferences.edit().putBoolean(KEY_PENDING_EXACT_ALARM_REQUEST, true).apply();
+										startActivity(intent);
+									} else {
+										Toast.makeText(this, "Please allow exact alarms in system settings.", Toast.LENGTH_LONG).show();
+									}
+								} catch (Exception e) {
+									e.printStackTrace();
 								}
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						})
-						.setNegativeButton("Cancel", null)
-						.create();
-				mExactAlarmDialog.show();
+							})
+							.setNegativeButton("Cancel", null)
+							.create();
+					mExactAlarmDialog.show();
+				} catch (Exception e) {
+					// Catch any window-related exceptions
+					e.printStackTrace();
+					mExactAlarmDialog = null;
+				}
 			}
 		}
 	}
 
+	private boolean isActivityValid() {
+		return mIsResumed && !isFinishing() && !isDestroyed();
+	}
+
 	private void dismissExactAlarmDialogIfShowing() {
-		if (mExactAlarmDialog != null && mExactAlarmDialog.isShowing()) {
-			mExactAlarmDialog.dismiss();
-			mExactAlarmDialog = null;
+		try {
+			if (mExactAlarmDialog != null && mExactAlarmDialog.isShowing()) {
+				mExactAlarmDialog.dismiss();
+			}
+		} catch (Exception e) {
+			// Ignore any exceptions during dismiss
 		}
+		mExactAlarmDialog = null;
+	}
+
+	private void cancelPendingExactAlarmRunnable() {
+		if (mHandler != null && mPendingExactAlarmRunnable != null) {
+			mHandler.removeCallbacks(mPendingExactAlarmRunnable);
+			mPendingExactAlarmRunnable = null;
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		dismissExactAlarmDialogIfShowing();
+		cancelPendingExactAlarmRunnable();
+		if (mHandler != null) {
+			mHandler.removeCallbacksAndMessages(null);
+			mHandler = null;
+		}
+		super.onDestroy();
 	}
 }

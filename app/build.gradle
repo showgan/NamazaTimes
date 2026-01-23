@@ -14,8 +14,8 @@ android {
         applicationId "com.mastegoane.namazatimes"
         minSdk 26
         targetSdk 36
-        versionCode 13
-        versionName "2.2"
+        versionCode 14
+        versionName "2.3"
 
         // next is needed to support vector drawables correctly
         vectorDrawables.useSupportLibrary = true
